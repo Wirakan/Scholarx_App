@@ -83,3 +83,4 @@ class ScholarXApp extends StatelessWidget {
     );
   }
 }
+

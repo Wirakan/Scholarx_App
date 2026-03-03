@@ -21,20 +21,19 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _onLoginWithSSO() {
-    // TODO: implement SSO login
+void _onLoginWithSSO() {
+    Navigator.pushReplacementNamed(context, '/student/home');
   }
 
   void _onLogin() {
-    // TODO: implement login with Student ID + Password
-  }
 
+    Navigator.pushReplacementNamed(context, '/student/home');
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          // Full background image (grayscale)
           Positioned.fill(
             child: ColorFiltered(
               colorFilter: const ColorFilter.matrix([
