@@ -80,16 +80,14 @@ class ScholarshipDetailScreen extends StatelessWidget {
                         const SizedBox(height: 8),
                         const _DetailText('สิทธิประโยชน์:'),
                         const _BulletItem(
-                          'ทุนการศึกษาสูงสุด 10,000 บาท / ปีการศึกษา',
-                        ),
+                            'ทุนการศึกษาสูงสุด 10,000 บาท / ปีการศึกษา'),
                         const _BulletItem(
-                          'สนับสนุนค่าเรียนและอุปกรณ์ด้านเทคโนโลยี',
-                        ),
-                        const _BulletItem('เข้าร่วมกิจกรรมพัฒนาทักษะดิจิทัล'),
+                            'สนับสนุนค่าเรียนและอุปกรณ์ด้านเทคโนโลยี'),
+                        const _BulletItem(
+                            'เข้าร่วมกิจกรรมพัฒนาทักษะดิจิทัล'),
                         const SizedBox(height: 8),
                         const _DetailText(
-                          'ระยะเวลารับสมัคร: 1 ก.พ. – 31 มี.ค. 2569',
-                        ),
+                            'ระยะเวลารับสมัคร: 1 ก.พ. – 31 มี.ค. 2569'),
                       ],
                     ),
                   ),
@@ -102,10 +100,10 @@ class ScholarshipDetailScreen extends StatelessWidget {
                       children: [
                         _CheckItem('เป็นนักศึกษาระดับปริญญาตรี'),
                         _CheckItem(
-                          'กำลังศึกษาในสาขาที่เกี่ยวข้องกับเทคโนโลยีดิจิทัล',
-                        ),
+                            'กำลังศึกษาในสาขาที่เกี่ยวข้องกับเทคโนโลยีดิจิทัล'),
                         _CheckItem('เกรดเฉลี่ยสะสม ไม่ต่ำกว่า 2.75'),
-                        _CheckItem('มีความสนใจหรือผลงานด้านเทคโนโลยีดิจิทัล'),
+                        _CheckItem(
+                            'มีความสนใจหรือผลงานด้านเทคโนโลยีดิจิทัล'),
                       ],
                     ),
                   ),
@@ -132,9 +130,7 @@ class ScholarshipDetailScreen extends StatelessWidget {
                     child: Text(
                       item.updatedAt,
                       style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.black87,
-                      ),
+                          fontSize: 14, color: Colors.black87),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -169,7 +165,8 @@ class ScholarshipDetailScreen extends StatelessWidget {
                 },
                 child: const Text(
                   'สมัครทุนนี้',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -203,10 +200,9 @@ class _SectionCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
+          Text(title,
+              style: const TextStyle(
+                  fontSize: 16, fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
           child,
         ],
@@ -224,10 +220,8 @@ class _DetailText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: const TextStyle(fontSize: 14, color: Colors.black87),
-    );
+    return Text(text,
+        style: const TextStyle(fontSize: 14, color: Colors.black87));
   }
 }
 
@@ -244,10 +238,9 @@ class _BulletItem extends StatelessWidget {
         children: [
           const Text('• ', style: TextStyle(fontSize: 14)),
           Expanded(
-            child: Text(
-              text,
-              style: const TextStyle(fontSize: 14, color: Colors.black87),
-            ),
+            child: Text(text,
+                style: const TextStyle(
+                    fontSize: 14, color: Colors.black87)),
           ),
         ],
       ),
@@ -266,13 +259,13 @@ class _CheckItem extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.check_circle, color: Color(0xFFFF5722), size: 20),
+          const Icon(Icons.check_circle,
+              color: Color(0xFFFF5722), size: 20),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(
-              text,
-              style: const TextStyle(fontSize: 14, color: Colors.black87),
-            ),
+            child: Text(text,
+                style: const TextStyle(
+                    fontSize: 14, color: Colors.black87)),
           ),
         ],
       ),
@@ -299,12 +292,13 @@ class _BottomNavBar extends StatelessWidget {
         children: const [
           _NavItem(icon: Icons.home_outlined, label: 'Home'),
           _NavItem(
-            icon: Icons.school_outlined,
-            label: 'Scholar',
-            isActive: true,
-          ),
-          _NavItem(icon: Icons.description_outlined, label: 'Tracking'),
-          _NavItem(icon: Icons.notifications_outlined, label: 'Alert'),
+              icon: Icons.school_outlined,
+              label: 'Scholar',
+              isActive: true),
+          _NavItem(
+              icon: Icons.description_outlined, label: 'Tracking'),
+          _NavItem(
+              icon: Icons.notifications_outlined, label: 'Alert'),
           _NavItem(icon: Icons.person_outline, label: 'Profile'),
         ],
       ),
@@ -325,7 +319,8 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isActive ? const Color(0xFFFF5722) : Colors.grey;
+    final color =
+        isActive ? const Color(0xFFFF5722) : Colors.grey;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [

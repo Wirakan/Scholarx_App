@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '/coreApp/themeApp/app_colors.dart';
 import '/coreApp/themeApp/app_text_style.dart';
-
 // ─────────────────────────────────────────────
 //  DATA MODEL
 // ─────────────────────────────────────────────
@@ -70,7 +69,17 @@ class TrackingScreen extends StatefulWidget {
   /// When set, this item is highlighted / pre-selected on open
   final TrackingItem? highlightItem;
 
-  const TrackingScreen({super.key, this.highlightItem});
+  /// Set false when used as a tab inside IndexedStack (bottom nav provided by parent)
+  final bool showBottomNav;
+
+  final void Function(int index)? onNavTap;
+
+  const TrackingScreen({
+    super.key,
+    this.highlightItem,
+    this.showBottomNav = true,
+    this.onNavTap,
+  });
 
   @override
   State<TrackingScreen> createState() => _TrackingScreenState();
@@ -200,7 +209,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
           ),
 
           // ── BOTTOM NAV ──
-          _BottomNavBar(),
+          if (widget.showBottomNav) _BottomNavBar(onNavTap: widget.onNavTap),
         ],
       ),
     );
@@ -392,17 +401,23 @@ class _EmptyState extends StatelessWidget {
 //  BOTTOM NAV BAR
 // ─────────────────────────────────────────────
 class _BottomNavBar extends StatelessWidget {
-  const _BottomNavBar();
+  final void Function(int index)? onNavTap;
+  const _BottomNavBar({this.onNavTap});
 
   @override
   Widget build(BuildContext context) {
     const items = [
-      _NavDef(Icons.home_outlined, 'Home'),
-      _NavDef(Icons.school_outlined, 'Scholar'),
-      _NavDef(Icons.description_outlined, 'Document'),
-      _NavDef(Icons.notifications_outlined, 'Notification'),
-      _NavDef(Icons.person_outline, 'Profile'),
+      (Icons.home_outlined, Icons.home_rounded, 'Home'),
+      (Icons.school_outlined, Icons.school_rounded, 'Scholar'),
+      (Icons.description_outlined, Icons.description_rounded, 'Document'),
+      (
+        Icons.notifications_outlined,
+        Icons.notifications_rounded,
+        'Notification',
+      ),
+      (Icons.person_outline, Icons.person_rounded, 'Profile'),
     ];
+    const activeIndex = 2;
 
     return Container(
       decoration: const BoxDecoration(
@@ -413,28 +428,42 @@ class _BottomNavBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: List.generate(items.length, (i) {
-          // Document tab (index 2) is active on this screen
-          final active = i == 2;
+          final active = i == activeIndex;
           final color = active ? AppColors.primary : AppColors.textTertiary;
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(items[i].icon, color: color, size: 24),
-              const SizedBox(height: 4),
-              Text(
-                items[i].label,
-                style: TextStyle(color: color, fontSize: 11),
+          return GestureDetector(
+            onTap: () {
+              if (onNavTap != null) {
+                onNavTap!(i);
+              } else {
+                Navigator.of(context).pop(i);
+              }
+            },
+            behavior: HitTestBehavior.opaque,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    active ? items[i].$2 : items[i].$1,
+                    color: color,
+                    size: 24,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    items[i].$3,
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 11,
+                      fontWeight: active ? FontWeight.w700 : FontWeight.w400,
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           );
         }),
       ),
     );
   }
-}
-
-class _NavDef {
-  final IconData icon;
-  final String label;
-  const _NavDef(this.icon, this.label);
 }

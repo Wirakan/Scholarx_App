@@ -1,16 +1,17 @@
+// features/student/screens/home/student_home_screen.dart
+
 import 'package:flutter/material.dart';
 import '/coreApp/themeApp/app_colors.dart';
 import '/coreApp/themeApp/app_text_style.dart';
 import '/coreApp/constants/app_strings.dart';
 import '/features/components/student_card.dart';
 import '/features/student/models/student_model.dart';
-import '/features/student/models/scholarship_detail_model.dart'; // new: shared mocks & item definition
+import '/features/student/models/scholarship_detail_model.dart';
+import '/features/student/models/scholarship_model.dart';
 import '/features/student/screens/profile/student_profile_screen.dart';
 import '/features/student/screens/scholar/scholar_screen.dart';
-import 'package:scholarx_app/features/student/screens/scholar/scholarship_detail.dart';
-
-// features/student/screens/home/student_home_screen.dart
-// แก้ไขจากเดิม: เพิ่ม import ScholarScreen + เปลี่ยน _PlaceholderTab ของ Scholar + onTap ของ action card
+import '/features/student/screens/scholar/scholarship_detail.dart';
+import '/features/student/screens/tracking/tracking_screen.dart';
 
 class StudentHomeScreen extends StatefulWidget {
   const StudentHomeScreen({super.key});
@@ -22,22 +23,29 @@ class StudentHomeScreen extends StatefulWidget {
 class _StudentHomeScreenState extends State<StudentHomeScreen> {
   int _selectedIndex = 0;
 
-  void _openScholarDetail(ScholarshipCardItem item) {
-    // optionally highlight the scholarship tab, but navigation will push
+  Future<void> _openScholarDetail(ScholarshipModel scholarship) async {
     setState(() => _selectedIndex = 1);
-
-    Navigator.push(
+    await Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => ScholarshipDetailScreen(item: item)),
+      MaterialPageRoute(
+        builder: (_) => ScholarshipDetailScreen(
+          item: ScholarshipCardItem(
+            id: scholarship.id,
+            title: scholarship.title,
+            category: scholarship.categoryLabel,
+            categoryColor: '#E8591A',
+            description: scholarship.description,
+            updatedAt: scholarship.deadline,
+          ),
+        ),
+      ),
     );
   }
 
-  // the student and scholarship list are defined once in the model
-  // file so that other screens (detail page, tests, etc.) can reuse
-  // the same data without duplication.
-  final StudentModel _student = mockStudent;
+  void _switchToTracking() => setState(() => _selectedIndex = 2);
 
-  static const List<ScholarshipCardItem> _scholarships = mockScholarships;
+  final StudentModel _student = mockStudent;
+  List<ScholarshipModel> get _scholarships => ScholarshipModel.mockList;
 
   @override
   Widget build(BuildContext context) {
@@ -50,11 +58,14 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
             student: _student,
             scholarships: _scholarships,
             onGoToScholar: () => setState(() => _selectedIndex = 1),
-            onOpenScholarDetail:
-                _openScholarDetail, // callback for "ดูรายละเอียด"
+            onGoToTracking: _switchToTracking,
+            onOpenScholarDetail: _openScholarDetail,
           ),
-          const ScholarScreen(), // ← เปลี่ยนจาก _PlaceholderTab เป็น ScholarScreen
-          const _PlaceholderTab(label: 'Tracking'),
+          const ScholarScreen(),
+          TrackingScreen(
+            showBottomNav: false,
+            onNavTap: (i) => setState(() => _selectedIndex = i),
+          ),
           const _PlaceholderTab(label: 'Alert'),
           StudentProfileScreen(student: _student),
         ],
@@ -67,18 +78,20 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
   }
 }
 
-// ─── Home Tab ─────────────────────────────────────────────────────────────────
+// ─── Home Tab ────────────────────────────────────────────────────────────────
 class _HomeTab extends StatelessWidget {
   final StudentModel student;
-  final List<ScholarshipCardItem> scholarships;
-  final VoidCallback onGoToScholar; // ← เพิ่ม parameter
-  final void Function(ScholarshipCardItem item) onOpenScholarDetail; // ✅ เพิ่ม
+  final List<ScholarshipModel> scholarships;
+  final VoidCallback onGoToScholar;
+  final VoidCallback onGoToTracking;
+  final void Function(ScholarshipModel) onOpenScholarDetail;
 
   const _HomeTab({
     required this.student,
     required this.scholarships,
-    required this.onGoToScholar, // ← เพิ่ม
-    required this.onOpenScholarDetail, // ✅ เพิ่ม
+    required this.onGoToScholar,
+    required this.onGoToTracking,
+    required this.onOpenScholarDetail,
   });
 
   @override
@@ -91,7 +104,7 @@ class _HomeTab extends StatelessWidget {
           sliver: SliverToBoxAdapter(
             child: Column(
               children: [
-                _GuideBanner(onTap: onGoToScholar), // ← ส่ง onTap
+                _GuideBanner(onTap: onGoToScholar),
                 const SizedBox(height: 16),
                 Row(
                   children: [
@@ -101,7 +114,7 @@ class _HomeTab extends StatelessWidget {
                         subtitle: AppStrings.openScholarships,
                         icon: Icons.emoji_events_rounded,
                         color: AppColors.primary,
-                        onTap: onGoToScholar, // ← navigate ไป Scholar tab
+                        onTap: onGoToScholar,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -111,7 +124,7 @@ class _HomeTab extends StatelessWidget {
                         subtitle: AppStrings.trackScholarshipSub,
                         icon: Icons.receipt_long_rounded,
                         color: const Color(0xFF5C4EE5),
-                        onTap: () {},
+                        onTap: onGoToTracking,
                       ),
                     ),
                   ],
@@ -143,18 +156,24 @@ class _HomeTab extends StatelessWidget {
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
           sliver: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (ctx, i) => Padding(
+            delegate: SliverChildBuilderDelegate((ctx, i) {
+              final s = scholarships[i];
+              final cardItem = ScholarshipCardItem(
+                id: s.id,
+                title: s.title,
+                category: s.categoryLabel,
+                categoryColor: '#E8591A',
+                description: s.description,
+                updatedAt: s.deadline,
+              );
+              return Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: StudentCard(
-                  item: scholarships[i],
-                  onTap: () => onOpenScholarDetail(
-                    scholarships[i],
-                  ), // ← กด "ดูรายละเอียด" → ไปหน้า Scholar
+                  item: cardItem,
+                  onTap: () => onOpenScholarDetail(s),
                 ),
-              ),
-              childCount: scholarships.length,
-            ),
+              );
+            }, childCount: scholarships.length),
           ),
         ),
       ],
@@ -162,7 +181,7 @@ class _HomeTab extends StatelessWidget {
   }
 }
 
-// ─── Profile Header ───────────────────────────────────────────────────────────
+// ─── Profile Header ──────────────────────────────────────────────────────────
 class _ProfileHeader extends StatelessWidget {
   final StudentModel student;
   const _ProfileHeader({required this.student});
@@ -233,9 +252,9 @@ class _ProfileHeader extends StatelessWidget {
   }
 }
 
-// ─── Guide Banner ─────────────────────────────────────────────────────────────
+// ─── Guide Banner ────────────────────────────────────────────────────────────
 class _GuideBanner extends StatelessWidget {
-  final VoidCallback? onTap; // ← เพิ่ม onTap
+  final VoidCallback? onTap;
   const _GuideBanner({this.onTap});
 
   @override
@@ -321,7 +340,7 @@ class _GuideBanner extends StatelessWidget {
   }
 }
 
-// ─── Action Card ──────────────────────────────────────────────────────────────
+// ─── Action Card ─────────────────────────────────────────────────────────────
 class _ActionCard extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -377,7 +396,7 @@ class _ActionCard extends StatelessWidget {
   }
 }
 
-// ─── Bottom Nav ───────────────────────────────────────────────────────────────
+// ─── Bottom Nav ──────────────────────────────────────────────────────────────
 class _BottomNav extends StatelessWidget {
   final int selectedIndex;
   final void Function(int) onTap;
@@ -452,7 +471,7 @@ class _BottomNav extends StatelessWidget {
   }
 }
 
-// ─── Placeholder Tab ──────────────────────────────────────────────────────────
+// ─── Placeholder Tab ─────────────────────────────────────────────────────────
 class _PlaceholderTab extends StatelessWidget {
   final String label;
   const _PlaceholderTab({required this.label});

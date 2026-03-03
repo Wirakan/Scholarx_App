@@ -16,6 +16,16 @@ class ScholarshipFormSuccess extends StatelessWidget {
     status: TrackingStatus.reviewing,
   );
 
+  // Pop ทุก route จนถึง root แล้วส่ง result กลับให้ StudentHomeScreen
+  // เพื่อ switch ไป tab index 2 (Tracking)
+  void _goHome(BuildContext context, {bool openTracking = false}) {
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    if (openTracking) {
+      // ส่ง result กลับให้ StudentHomeScreen ผ่าน Navigator result
+      Navigator.of(context).pop(2); // 2 = tracking tab index
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,6 +73,8 @@ class ScholarshipFormSuccess extends StatelessWidget {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 24),
+
+                    // Application details card
                     Container(
                       width: double.infinity,
                       decoration: BoxDecoration(
@@ -92,6 +104,8 @@ class ScholarshipFormSuccess extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
+
+                    // Notice banner
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(14),
@@ -123,6 +137,8 @@ class ScholarshipFormSuccess extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 28),
+
+                    // ── ติดตามทุน → TrackingScreen (push on top) ──
                     SizedBox(
                       width: double.infinity,
                       height: 50,
@@ -154,12 +170,17 @@ class ScholarshipFormSuccess extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 12),
+
+                    // ── กลับหน้าหลัก → StudentHomeScreen tab 2 (Tracking) ──
                     SizedBox(
                       width: double.infinity,
                       height: 50,
                       child: OutlinedButton.icon(
-                        onPressed: () =>
-                            Navigator.of(context).popUntil((r) => r.isFirst),
+                        onPressed: () {
+                          // Pop ทุก route กลับถึง StudentHomeScreen
+                          // แล้วส่ง tabIndex=2 เป็น result เพื่อ switch tab
+                          Navigator.of(context).popUntil((r) => r.isFirst);
+                        },
                         icon: const Icon(Icons.home_outlined, size: 18),
                         label: const Text('กลับหน้าหลัก'),
                         style: OutlinedButton.styleFrom(
