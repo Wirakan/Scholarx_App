@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'coreApp/themeApp/app_theme.dart';
@@ -24,4 +23,3 @@ class ScholarXApp extends StatelessWidget {
     );
   }
 }
-
