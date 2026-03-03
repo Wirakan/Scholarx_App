@@ -69,7 +69,9 @@ class ScholarshipDetailScreen extends StatelessWidget {
                         _BulletItem('ดิจิทัลมีเดีย / AI / Data'),
                         const SizedBox(height: 8),
                         _DetailText('สิทธิประโยชน์:'),
-                        _BulletItem('ทุนการศึกษาสูงสุด 10,000 บาท / ปีการศึกษา'),
+                        _BulletItem(
+                          'ทุนการศึกษาสูงสุด 10,000 บาท / ปีการศึกษา',
+                        ),
                         _BulletItem('สนับสนุนค่าเรียนและอุปกรณ์ด้านเทคโนโลยี'),
                         _BulletItem('เข้าร่วมกิจกรรมพัฒนาทักษะดิจิทัล'),
                         const SizedBox(height: 8),
@@ -84,7 +86,9 @@ class ScholarshipDetailScreen extends StatelessWidget {
                     child: Column(
                       children: [
                         _CheckItem('เป็นนักศึกษาระดับปริญญาตรี'),
-                        _CheckItem('กำลังศึกษาในสาขาที่เกี่ยวข้องกับเทคโนโลยีดิจิทัล'),
+                        _CheckItem(
+                          'กำลังศึกษาในสาขาที่เกี่ยวข้องกับเทคโนโลยีดิจิทัล',
+                        ),
                         _CheckItem('เกรดเฉลี่ยสะสม ไม่ต่ำกว่า 2.75'),
                         _CheckItem('มีความสนใจหรือผลงานด้านเทคโนโลยีดิจิทัล'),
                       ],
@@ -161,10 +165,7 @@ class _SectionCard extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
           child,
@@ -200,7 +201,10 @@ class _BulletItem extends StatelessWidget {
         children: [
           const Text('• ', style: TextStyle(fontSize: 14)),
           Expanded(
-            child: Text(text, style: const TextStyle(fontSize: 14, color: Colors.black87)),
+            child: Text(
+              text,
+              style: const TextStyle(fontSize: 14, color: Colors.black87),
+            ),
           ),
         ],
       ),
@@ -222,7 +226,10 @@ class _CheckItem extends StatelessWidget {
           const Icon(Icons.check_circle, color: Color(0xFFFF5722), size: 20),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(text, style: const TextStyle(fontSize: 14, color: Colors.black87)),
+            child: Text(
+              text,
+              style: const TextStyle(fontSize: 14, color: Colors.black87),
+            ),
           ),
         ],
       ),
@@ -245,7 +252,12 @@ class _BottomNavBar extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _NavItem(icon: Icons.home_outlined, label: 'Home'),
-          _NavItem(icon: Icons.star_outline, label: 'Scholar', isActive: true),
+          // consistent scholar icon across screens
+          _NavItem(
+            icon: Icons.school_outlined,
+            label: 'Scholar',
+            isActive: true,
+          ),
           _NavItem(icon: Icons.description_outlined, label: 'Tracking'),
           _NavItem(icon: Icons.notifications_outlined, label: 'Alert'),
           _NavItem(icon: Icons.person_outline, label: 'Profile'),

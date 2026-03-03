@@ -4,8 +4,10 @@ import '/coreApp/themeApp/app_text_style.dart';
 import '/coreApp/constants/app_strings.dart';
 import '/features/components/student_card.dart';
 import '/features/student/models/student_model.dart';
+import '/features/student/models/scholarship_detail_model.dart'; // new: shared mocks & item definition
 import '/features/student/screens/profile/student_profile_screen.dart';
 import '/features/student/screens/scholar/scholar_screen.dart';
+import 'package:scholarx_app/features/student/screens/scholar/scholarship_detail.dart';
 
 // features/student/screens/home/student_home_screen.dart
 // แก้ไขจากเดิม: เพิ่ม import ScholarScreen + เปลี่ยน _PlaceholderTab ของ Scholar + onTap ของ action card
@@ -19,34 +21,23 @@ class StudentHomeScreen extends StatefulWidget {
 
 class _StudentHomeScreenState extends State<StudentHomeScreen> {
   int _selectedIndex = 0;
-  final StudentModel _student = StudentModel.mock;
 
-  static const List<ScholarshipCardItem> _scholarships = [
-    ScholarshipCardItem(
-      title: 'ทุนการศึกษาเพื่อความเป็นเลิศทางวิชาการ',
-      category: 'สำหรับนักศึกษาระดับปริญญาตรี',
-      categoryColor: '#E8591A',
-      description:
-          'สนับสนุนค่าเล่าเรียนและค่าครองชีพ สำหรับนักศึกษาที่มีผลการเรียนดี และมีความประพฤติดี',
-      updatedAt: '1 ม.ค. 2569',
-    ),
-    ScholarshipCardItem(
-      title: 'ประกาศผลผู้ได้รับทุน รอบที่ 1',
-      category: 'ประจำปีการศึกษา 2569',
-      categoryColor: '#E8591A',
-      description:
-          'ผู้สมัครสามารถตรวจสอบรายชื่อผู้ได้รับทุนและขั้นตอนต่อไปได้ในแอป',
-      updatedAt: '1 ม.ค. 2569',
-    ),
-    ScholarshipCardItem(
-      title: 'ทุนด้านเทคโนโลยีดิจิทัล',
-      category: 'ทุนเฉพาะทาง Digital / IT / Engineering',
-      categoryColor: '#E8591A',
-      description:
-          'มอบทุนให้แก่นักศึกษาที่มีความสนใจด้านเทคโนโลยี นวัตกรรม และการพัฒนาดิจิทัล',
-      updatedAt: '1 ม.ค. 2569',
-    ),
-  ];
+  void _openScholarDetail(ScholarshipCardItem item) {
+    // optionally highlight the scholarship tab, but navigation will push
+    setState(() => _selectedIndex = 1);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => ScholarshipDetailScreen(item: item)),
+    );
+  }
+
+  // the student and scholarship list are defined once in the model
+  // file so that other screens (detail page, tests, etc.) can reuse
+  // the same data without duplication.
+  final StudentModel _student = mockStudent;
+
+  static const List<ScholarshipCardItem> _scholarships = mockScholarships;
 
   @override
   Widget build(BuildContext context) {
@@ -58,8 +49,9 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
           _HomeTab(
             student: _student,
             scholarships: _scholarships,
-            onGoToScholar: () =>
-                setState(() => _selectedIndex = 1), // ← ส่ง callback
+            onGoToScholar: () => setState(() => _selectedIndex = 1),
+            onOpenScholarDetail:
+                _openScholarDetail, // callback for "ดูรายละเอียด"
           ),
           const ScholarScreen(), // ← เปลี่ยนจาก _PlaceholderTab เป็น ScholarScreen
           const _PlaceholderTab(label: 'Tracking'),
@@ -80,11 +72,13 @@ class _HomeTab extends StatelessWidget {
   final StudentModel student;
   final List<ScholarshipCardItem> scholarships;
   final VoidCallback onGoToScholar; // ← เพิ่ม parameter
+  final void Function(ScholarshipCardItem item) onOpenScholarDetail; // ✅ เพิ่ม
 
   const _HomeTab({
     required this.student,
     required this.scholarships,
     required this.onGoToScholar, // ← เพิ่ม
+    required this.onOpenScholarDetail, // ✅ เพิ่ม
   });
 
   @override
@@ -154,7 +148,9 @@ class _HomeTab extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 12),
                 child: StudentCard(
                   item: scholarships[i],
-                  onTap: onGoToScholar, // ← กด "ดูรายละเอียด" → ไปหน้า Scholar
+                  onTap: () => onOpenScholarDetail(
+                    scholarships[i],
+                  ), // ← กด "ดูรายละเอียด" → ไปหน้า Scholar
                 ),
               ),
               childCount: scholarships.length,

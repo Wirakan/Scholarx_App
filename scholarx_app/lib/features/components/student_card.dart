@@ -2,21 +2,13 @@ import 'package:flutter/material.dart';
 import '/coreApp/themeApp/app_colors.dart';
 import '/coreApp/themeApp/app_text_style.dart';
 
-class ScholarshipCardItem {
-  final String title;
-  final String category;
-  final String categoryColor;
-  final String description;
-  final String updatedAt;
+// ScholarshipCardItem used by the cards is now defined in the
+// student/models package.  we re‑export it here so existing imports
+// continue to work without changes.
+import '/features/student/models/scholarship_detail_model.dart';
 
-  const ScholarshipCardItem({
-    required this.title,
-    required this.category,
-    required this.categoryColor,
-    required this.description,
-    required this.updatedAt,
-  });
-}
+export '/features/student/models/scholarship_detail_model.dart'
+    show ScholarshipCardItem;
 
 class StudentCard extends StatelessWidget {
   final ScholarshipCardItem item;
