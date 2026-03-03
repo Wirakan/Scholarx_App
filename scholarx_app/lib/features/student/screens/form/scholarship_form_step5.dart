@@ -146,12 +146,14 @@ class _ReviewCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Container(
+Container(
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
                   color: iconBg,
-                  shape: BoxShape.circle,
+                  borderRadius: BorderRadius.circular(
+                    8,
+                  ), 
                 ),
                 child: Icon(icon, color: AppColors.primary, size: 18),
               ),

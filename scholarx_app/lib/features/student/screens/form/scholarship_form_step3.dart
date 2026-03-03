@@ -69,8 +69,9 @@ class _ScholarshipFormStep3State extends State<ScholarshipFormStep3> {
                     message:
                         'กรอกข้อมูลผู้อุปการะที่สามารถติดต่อได้ในกรณีฉุกเฉิน',
                   ),
-                  FormSectionCard(
+FormSectionCard(
                     icon: Icons.person_outline,
+                    iconBorderRadius: BorderRadius.circular(8), // ← เพิ่ม
                     title: 'ข้อมูลผู้อุปการะ',
                     children: [
                       FormTextField(
