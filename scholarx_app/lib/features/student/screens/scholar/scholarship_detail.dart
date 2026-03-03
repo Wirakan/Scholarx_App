@@ -25,26 +25,30 @@ class ScholarshipDetailScreen extends StatelessWidget {
               constraints: const BoxConstraints(),
             ),
             const SizedBox(width: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.title,
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.title,
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                Text(
-                  item.category,
-                  style: const TextStyle(
-                    color: Colors.grey,
-                    fontSize: 14,
-                    fontWeight: FontWeight.normal,
+                  Text(
+                    item.category,
+                    style: const TextStyle(
+                      color: Colors.grey,
+                      fontSize: 14,
+                      fontWeight: FontWeight.normal,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),
@@ -58,17 +62,71 @@ class ScholarshipDetailScreen extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
+                  // รายละเอียดทุน
                   _SectionCard(
                     title: 'รายละเอียดทุน',
-                    child: Text(
-                      item.description,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.black87,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _DetailText(item.description),
+                        const SizedBox(height: 12),
+                        _DetailText('ระดับการศึกษา: ปริญญาตรี'),
+                        const SizedBox(height: 8),
+                        const _DetailText('สาขาที่เกี่ยวข้อง:'),
+                        const _BulletItem('เทคโนโลยีสารสนเทศ'),
+                        const _BulletItem('วิศวกรรมคอมพิวเตอร์'),
+                        const _BulletItem('วิทยาการคอมพิวเตอร์'),
+                        const _BulletItem('ดิจิทัลมีเดีย / AI / Data'),
+                        const SizedBox(height: 8),
+                        const _DetailText('สิทธิประโยชน์:'),
+                        const _BulletItem(
+                          'ทุนการศึกษาสูงสุด 10,000 บาท / ปีการศึกษา',
+                        ),
+                        const _BulletItem(
+                          'สนับสนุนค่าเรียนและอุปกรณ์ด้านเทคโนโลยี',
+                        ),
+                        const _BulletItem('เข้าร่วมกิจกรรมพัฒนาทักษะดิจิทัล'),
+                        const SizedBox(height: 8),
+                        const _DetailText(
+                          'ระยะเวลารับสมัคร: 1 ก.พ. – 31 มี.ค. 2569',
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 12),
+
+                  // คุณสมบัติ
+                  const _SectionCard(
+                    title: 'คุณสมบัติ',
+                    child: Column(
+                      children: [
+                        _CheckItem('เป็นนักศึกษาระดับปริญญาตรี'),
+                        _CheckItem(
+                          'กำลังศึกษาในสาขาที่เกี่ยวข้องกับเทคโนโลยีดิจิทัล',
+                        ),
+                        _CheckItem('เกรดเฉลี่ยสะสม ไม่ต่ำกว่า 2.75'),
+                        _CheckItem('มีความสนใจหรือผลงานด้านเทคโนโลยีดิจิทัล'),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // เอกสารที่ต้องใช้
+                  const _SectionCard(
+                    title: 'เอกสารที่ต้องใช้',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _BulletItem('สำเนาบัตรประจำตัวประชาชน'),
+                        _BulletItem('รูปถ่ายหน้าตรง (พื้นหลังสุภาพ)'),
+                        _BulletItem('ใบแสดงผลการเรียน (Transcript)'),
+                        _BulletItem('สำเนาสมุดบัญชีธนาคาร'),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // อัปเดตล่าสุด
                   _SectionCard(
                     title: 'อัปเดตล่าสุด',
                     child: Text(
@@ -84,6 +142,8 @@ class ScholarshipDetailScreen extends StatelessWidget {
               ),
             ),
           ),
+
+          // ปุ่มสมัคร
           Container(
             color: Colors.white,
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
@@ -100,7 +160,6 @@ class ScholarshipDetailScreen extends StatelessWidget {
                   elevation: 0,
                 ),
                 onPressed: () {
-                  // Navigate to multi-step scholarship application form
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -115,13 +174,17 @@ class ScholarshipDetailScreen extends StatelessWidget {
               ),
             ),
           ),
-          _BottomNavBar(),
+
+          const _BottomNavBar(),
         ],
       ),
     );
   }
 }
 
+// ─────────────────────────────────────────────
+//  SECTION CARD
+// ─────────────────────────────────────────────
 class _SectionCard extends StatelessWidget {
   final String title;
   final Widget child;
@@ -152,6 +215,74 @@ class _SectionCard extends StatelessWidget {
   }
 }
 
+// ─────────────────────────────────────────────
+//  HELPERS
+// ─────────────────────────────────────────────
+class _DetailText extends StatelessWidget {
+  final String text;
+  const _DetailText(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: const TextStyle(fontSize: 14, color: Colors.black87),
+    );
+  }
+}
+
+class _BulletItem extends StatelessWidget {
+  final String text;
+  const _BulletItem(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8, top: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('• ', style: TextStyle(fontSize: 14)),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(fontSize: 14, color: Colors.black87),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CheckItem extends StatelessWidget {
+  final String text;
+  const _CheckItem(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.check_circle, color: Color(0xFFFF5722), size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(fontSize: 14, color: Colors.black87),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────
+//  BOTTOM NAV BAR
+// ─────────────────────────────────────────────
 class _BottomNavBar extends StatelessWidget {
   const _BottomNavBar();
 
