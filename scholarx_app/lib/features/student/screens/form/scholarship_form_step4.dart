@@ -34,13 +34,13 @@ class _ScholarshipFormStep4State extends State<ScholarshipFormStep4> {
   final List<_DocItem> _docs = [
     _DocItem(
       title: 'สำเนาบัตรประชาชน',
-      status: _UploadStatus.done,
+      status: _UploadStatus.empty,
       fileName: 'id_card_scan.jpg',
     ),
     _DocItem(
       title: 'รูปถ่ายหน้าตรง (พื้นหลังสุภาพ)',
-      status: _UploadStatus.uploading,
-      progress: 0.8,
+      status: _UploadStatus.empty,
+      fileName: 'face_image.jpg',
     ),
     _DocItem(
       title: 'ใบแสดงผลการเรียน (Transcript)',
@@ -48,7 +48,7 @@ class _ScholarshipFormStep4State extends State<ScholarshipFormStep4> {
     ),
     _DocItem(
       title: 'สำเนาสมุดบัญชีธนาคาร',
-      status: _UploadStatus.done,
+      status: _UploadStatus.empty,
       fileName: 'bank_copy.pdf',
     ),
   ];
@@ -58,7 +58,7 @@ class _ScholarshipFormStep4State extends State<ScholarshipFormStep4> {
       _docs[index].status = _UploadStatus.uploading;
       _docs[index].progress = 0.3;
     });
-    Future.delayed(const Duration(milliseconds: 800), () {
+    Future.delayed(const Duration(milliseconds: 100), () {
       if (mounted) {
         setState(() {
           _docs[index].status = _UploadStatus.done;

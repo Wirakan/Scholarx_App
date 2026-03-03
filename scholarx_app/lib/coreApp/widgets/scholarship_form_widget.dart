@@ -69,51 +69,48 @@ class StepIndicatorBar extends StatelessWidget {
       color: Colors.white,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
-        children: List.generate(labels.length, (i) {
-          final step = i + 1;
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: List.generate(labels.length * 2 - 1, (i) {
+          // even index = step, odd index = connector line
+          if (i.isOdd) {
+            final stepIndex = i ~/ 2;
+            final isDone = (stepIndex + 1) < currentStep;
+            return Expanded(
+              child: Container(
+                height: 2,
+                margin: const EdgeInsets.only(top: 13),
+                color: isDone ? AppColors.primary : AppColors.border,
+              ),
+            );
+          }
+
+          final stepIndex = i ~/ 2;
+          final step = stepIndex + 1;
           final isDone = step < currentStep;
           final isActive = step == currentStep;
 
-          return Expanded(
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _StepCircle(
-                        step: step,
-                        isDone: isDone,
-                        isActive: isActive,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        labels[i],
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: isActive || isDone
-                              ? FontWeight.w700
-                              : FontWeight.w400,
-                          color: isActive
-                              ? AppColors.primary
-                              : isDone
-                              ? AppColors.primary
-                              : AppColors.textTertiary,
-                          height: 1.3,
-                        ),
-                      ),
-                    ],
-                  ),
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _StepCircle(step: step, isDone: isDone, isActive: isActive),
+              const SizedBox(height: 4),
+              Text(
+                labels[stepIndex],
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: isActive || isDone
+                      ? FontWeight.w700
+                      : FontWeight.w400,
+                  color: isActive
+                      ? AppColors.primary
+                      : isDone
+                      ? AppColors.primary
+                      : AppColors.textTertiary,
+                  height: 1.3,
                 ),
-                if (i < labels.length - 1)
-                  Container(
-                    width: 20,
-                    height: 2,
-                    color: isDone ? AppColors.primary : AppColors.border,
-                  ),
-              ],
-            ),
+              ),
+            ],
           );
         }),
       ),
