@@ -62,7 +62,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'coreApp/themeApp/app_theme.dart';
 import 'features/student_routes.dart';
-import 'screens/splash_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -78,14 +77,9 @@ class ScholarXApp extends StatelessWidget {
     return MaterialApp(
       title: 'ScholarX',
       debugShowCheckedModeBanner: false,
-      initialRoute: AppRoutes.selectRole,
+      theme: AppTheme.lightTheme,
+      initialRoute: AppRoutes.splashScreen,
       routes: AppRoutes.routes,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFFF5722)),
-        useMaterial3: true,
-        fontFamily: 'Roboto',
-      ),
-      home: const SplashScreen(),
     );
   }
 }
