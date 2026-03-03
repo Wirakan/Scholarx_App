@@ -195,7 +195,7 @@ class _SectionCard extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
       ),
       padding: const EdgeInsets.all(20),
       child: Column(

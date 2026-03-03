@@ -68,7 +68,7 @@ class StudentCard extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     border: Border.all(color: AppColors.primary),
-                    borderRadius: BorderRadius.circular(999),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     'ดูรายละเอียด',

@@ -147,7 +147,7 @@ class _ScholarScreenState extends State<ScholarScreen> {
                           color: isSelected
                               ? AppColors.primary
                               : AppColors.background,
-                          borderRadius: BorderRadius.circular(999),
+                          borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: isSelected
                                 ? AppColors.primary

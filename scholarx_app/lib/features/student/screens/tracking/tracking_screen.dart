@@ -169,7 +169,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
                                 ? AppColors.primary
                                 : AppColors.border,
                           ),
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           tab.label,
@@ -253,7 +253,7 @@ class _TrackingCard extends StatelessWidget {
       duration: const Duration(milliseconds: 300),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         border: isHighlighted
             ? Border.all(color: AppColors.primary, width: 2)
             : null,
@@ -365,7 +365,7 @@ class _StatusBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         label,
@@ -407,15 +407,15 @@ class _BottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const items = [
-      (Icons.home_outlined, Icons.home_rounded, 'Home'),
-      (Icons.school_outlined, Icons.school_rounded, 'Scholar'),
-      (Icons.description_outlined, Icons.description_rounded, 'Document'),
-      (
-        Icons.notifications_outlined,
+      _NavDef(Icons.home_rounded, Icons.home_outlined, 'Home'),
+      _NavDef(Icons.school_rounded, Icons.school_outlined, 'Scholar'),
+      _NavDef(Icons.fact_check_rounded, Icons.fact_check_outlined, 'Tracking'),
+      _NavDef(
         Icons.notifications_rounded,
-        'Notification',
+        Icons.notifications_outlined,
+        'Alerts',
       ),
-      (Icons.person_outline, Icons.person_rounded, 'Profile'),
+      _NavDef(Icons.person_rounded, Icons.person_outlined, 'Profile'),
     ];
     const activeIndex = 2;
 
@@ -428,8 +428,7 @@ class _BottomNavBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: List.generate(items.length, (i) {
-          final active = i == activeIndex;
-          final color = active ? AppColors.primary : AppColors.textTertiary;
+          final isActive = i == activeIndex;
           return GestureDetector(
             onTap: () {
               if (onNavTap != null) {
@@ -444,18 +443,34 @@ class _BottomNavBar extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    active ? items[i].$2 : items[i].$1,
-                    color: color,
-                    size: 24,
-                  ),
+                  isActive
+                      ? Container(
+                          width: 48,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            items[i].activeIcon,
+                            color: Colors.white,
+                            size: 22,
+                          ),
+                        )
+                      : Icon(
+                          items[i].inactiveIcon,
+                          color: const Color(0xFF9E9E9E),
+                          size: 24,
+                        ),
                   const SizedBox(height: 4),
                   Text(
-                    items[i].$3,
+                    items[i].label,
                     style: TextStyle(
-                      color: color,
-                      fontSize: 11,
-                      fontWeight: active ? FontWeight.w700 : FontWeight.w400,
+                      fontSize: 10,
+                      fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
+                      color: isActive
+                          ? AppColors.primary
+                          : const Color(0xFF9E9E9E),
                     ),
                   ),
                 ],
@@ -466,4 +481,11 @@ class _BottomNavBar extends StatelessWidget {
       ),
     );
   }
+}
+
+class _NavDef {
+  final IconData activeIcon;
+  final IconData inactiveIcon;
+  final String label;
+  const _NavDef(this.activeIcon, this.inactiveIcon, this.label);
 }

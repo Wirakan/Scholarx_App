@@ -71,7 +71,7 @@ class _ProfileHero extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(999),
+              borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
               'แก้ไขข้อมูล',

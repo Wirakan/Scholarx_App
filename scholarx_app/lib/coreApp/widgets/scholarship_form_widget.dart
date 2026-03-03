@@ -207,7 +207,7 @@ class FormSectionCard extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -373,7 +373,6 @@ class FormDropdown extends StatelessWidget {
     );
   }
 }
-
 // ─────────────────────────────────────────────
 //  BOTTOM NAV BAR
 // ─────────────────────────────────────────────
@@ -385,11 +384,15 @@ class AppBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const items = [
-      _NavDef(Icons.home_outlined, 'Home'),
-      _NavDef(Icons.school_outlined, 'Scholar'),
-      _NavDef(Icons.description_outlined, 'Tracking'),
-      _NavDef(Icons.notifications_outlined, 'Alert'),
-      _NavDef(Icons.person_outline, 'Profile'),
+      _NavDef(Icons.home_rounded, Icons.home_outlined, 'Home'),
+      _NavDef(Icons.school_rounded, Icons.school_outlined, 'Scholar'),
+      _NavDef(Icons.fact_check_rounded, Icons.fact_check_outlined, 'Tracking'),
+      _NavDef(
+        Icons.notifications_rounded,
+        Icons.notifications_outlined,
+        'Alerts',
+      ),
+      _NavDef(Icons.person_rounded, Icons.person_outlined, 'Profile'),
     ];
 
     return Container(
@@ -401,16 +404,37 @@ class AppBottomNavBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: List.generate(items.length, (i) {
-          final active = i == activeIndex;
-          final color = active ? AppColors.primary : AppColors.textTertiary;
+          final isActive = i == activeIndex;
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(items[i].icon, color: color, size: 24),
+              isActive
+                  ? Container(
+                      width: 48,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        items[i].activeIcon,
+                        color: Colors.white,
+                        size: 22,
+                      ),
+                    )
+                  : Icon(
+                      items[i].inactiveIcon,
+                      color: const Color(0xFF9E9E9E),
+                      size: 24,
+                    ),
               const SizedBox(height: 4),
               Text(
                 items[i].label,
-                style: TextStyle(color: color, fontSize: 11),
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
+                  color: isActive ? AppColors.primary : const Color(0xFF9E9E9E),
+                ),
               ),
             ],
           );
@@ -421,11 +445,11 @@ class AppBottomNavBar extends StatelessWidget {
 }
 
 class _NavDef {
-  final IconData icon;
+  final IconData activeIcon;
+  final IconData inactiveIcon;
   final String label;
-  const _NavDef(this.icon, this.label);
+  const _NavDef(this.activeIcon, this.inactiveIcon, this.label);
 }
-
 // ─────────────────────────────────────────────
 //  BOTTOM BUTTON ROW (ย้อนกลับ / ถัดไป)
 // ─────────────────────────────────────────────

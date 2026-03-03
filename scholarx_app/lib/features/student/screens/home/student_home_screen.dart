@@ -269,7 +269,7 @@ class _GuideBanner extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
             color: AppColors.primary.withOpacity(0.35),
@@ -292,7 +292,7 @@ class _GuideBanner extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.25),
-                    borderRadius: BorderRadius.circular(999),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     'แนะนำ',
@@ -321,7 +321,9 @@ class _GuideBanner extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(999),
+                      borderRadius: BorderRadius.circular(
+                        8,
+                      ), // เปลี่ยนจาก 999 → 8
                     ),
                     child: Text(
                       AppStrings.startNow,
@@ -366,7 +368,7 @@ class _ActionCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: color,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(
               color: color.withOpacity(0.3),
@@ -398,7 +400,7 @@ class _ActionCard extends StatelessWidget {
   }
 }
 
-// ─── Bottom Nav ──────────────────────────────────────────────────────────────
+// ─── Bottom Nav ───────────────────────────────────────────────────────────────
 class _BottomNav extends StatelessWidget {
   final int selectedIndex;
   final void Function(int) onTap;
@@ -410,16 +412,8 @@ class _BottomNav extends StatelessWidget {
     const items = [
       (Icons.home_rounded, Icons.home_outlined, AppStrings.home),
       (Icons.school_rounded, Icons.school_outlined, AppStrings.scholar),
-      (
-        Icons.description_rounded,
-        Icons.description_outlined,
-        AppStrings.document,
-      ),
-      (
-        Icons.notifications_rounded,
-        Icons.notifications_outlined,
-        AppStrings.notification,
-      ),
+      (Icons.fact_check_rounded, Icons.fact_check_outlined, AppStrings.document),
+      (Icons.notifications_rounded, Icons.notifications_outlined, AppStrings.notification),
       (Icons.person_rounded, Icons.person_outlined, AppStrings.profile),
     ];
 
@@ -441,14 +435,26 @@ class _BottomNav extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        isSelected ? items[i].$1 : items[i].$2,
-                        color: isSelected
-                            ? AppColors.primary
-                            : const Color(0xFF9E9E9E),
-                        size: 24,
-                      ),
-                      const SizedBox(height: 3),
+                      isSelected
+                          ? Container(
+                              width: 48,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                color: AppColors.primary,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(
+                                items[i].$1,
+                                color: Colors.white,
+                                size: 22,
+                              ),
+                            )
+                          : Icon(
+                              items[i].$2,
+                              color: const Color(0xFF9E9E9E),
+                              size: 24,
+                            ),
+                      const SizedBox(height: 4),
                       Text(
                         items[i].$3,
                         style: TextStyle(
