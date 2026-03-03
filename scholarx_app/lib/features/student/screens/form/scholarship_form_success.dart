@@ -89,7 +89,8 @@ class ScholarshipFormSuccess extends StatelessWidget {
                           Text(
                             'AP011001',
                             style: AppTextStyle.heading2.copyWith(
-                              color: AppColors.primary,
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                           const Divider(height: 24),
@@ -129,7 +130,7 @@ class ScholarshipFormSuccess extends StatelessWidget {
                             child: Text(
                               'โปรดติดตามการแจ้งเตือน ระบบจะใช้เวลาโดยประมาณ 7-14 วัน',
                               style: AppTextStyle.caption.copyWith(
-                                color: AppColors.primaryDark,
+                                color: Colors.black87,
                               ),
                             ),
                           ),
