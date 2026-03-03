@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:scholarx/features/auth/screens/select_role_screen.dart';
-import 'package:scholarx/features/student/screens/login/student_login_screen.dart';
-import 'package:scholarx/features/student/screens/home/student_home_screen.dart';
+import '/features/auth/screens/select_role_screen.dart';
+import '/features/student/screens/login/student_login_screen.dart';
+import '/features/student/screens/home/student_home_screen.dart';
 
 
 class AppRoutes {

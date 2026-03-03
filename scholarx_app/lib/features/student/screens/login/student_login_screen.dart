@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:scholarx/coreApp/themeApp/app_colors.dart';
-import 'package:scholarx/coreApp/themeApp/app_text_style.dart';
-import 'package:scholarx/coreApp/widgets/primary_button.dart';
-import 'package:scholarx/coreApp/widgets/form_input.dart';
-import 'package:scholarx/coreApp/constants/app_strings.dart';
-import 'package:scholarx/features/student/screens/home/student_home_screen.dart';
+import '/coreApp/themeApp/app_colors.dart';
+import '/coreApp/themeApp/app_text_style.dart';
+import '/coreApp/widgets/primary_button.dart';
+import '/coreApp/widgets/form_input.dart';
+import '/coreApp/constants/app_strings.dart';
+import '/features/student/screens/home/student_home_screen.dart';
 
 class StudentLoginScreen extends StatefulWidget {
   const StudentLoginScreen({super.key});

@@ -1,10 +1,10 @@
 // features/student/screens/scholar/scholar_screen.dart
 
 import 'package:flutter/material.dart';
-import 'package:scholarx/coreApp/themeApp/app_colors.dart';
-import 'package:scholarx/coreApp/themeApp/app_text_style.dart';
-import 'package:scholarx/features/components/scholarship_list_card.dart';
-import 'package:scholarx/features/student/models/scholarship_model.dart';
+import '/coreApp/themeApp/app_colors.dart';
+import '/coreApp/themeApp/app_text_style.dart';
+import '/features/components/scholarship_list_card.dart';
+import '/features/student/models/scholarship_model.dart';
 
 class ScholarScreen extends StatefulWidget {
   const ScholarScreen({super.key});

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:scholarx/coreApp/themeApp/app_colors.dart';
-import 'package:scholarx/coreApp/themeApp/app_text_style.dart';
+import '/coreApp/themeApp/app_colors.dart';
+import '/coreApp/themeApp/app_text_style.dart';
 
 class ScholarshipCardItem {
   final String title;
