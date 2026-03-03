@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:scholarx/coreApp/themeApp/app_colors.dart';
-import 'package:scholarx/coreApp/themeApp/app_text_style.dart';
-import 'package:scholarx/coreApp/constants/app_strings.dart';
-import 'package:scholarx/features/components/student_card.dart';
-import 'package:scholarx/features/student/models/student_model.dart';
-import 'package:scholarx/features/student/screens/profile/student_profile_screen.dart';
-import 'package:scholarx/features/student/screens/scholar/scholar_screen.dart';
+import '/coreApp/themeApp/app_colors.dart';
+import '/coreApp/themeApp/app_text_style.dart';
+import '/coreApp/constants/app_strings.dart';
+import '/features/components/student_card.dart';
+import '/features/student/models/student_model.dart';
+import '/features/student/screens/profile/student_profile_screen.dart';
+import '/features/student/screens/scholar/scholar_screen.dart';
 
 // features/student/screens/home/student_home_screen.dart
 // แก้ไขจากเดิม: เพิ่ม import ScholarScreen + เปลี่ยน _PlaceholderTab ของ Scholar + onTap ของ action card
