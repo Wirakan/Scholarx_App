@@ -60,7 +60,7 @@ class WelcomeScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 14),
                       const Text(
-                        'Your academic journey deserves the right support,\ndiscover opportunities that move you closer to your future.',
+                        'การเรียนของคุณควรมีการสนับสนุนที่ใช่\nค้นพบโอกาสใหม่ ๆ ที่ช่วยให้คุณเข้าใกล้อนาคตที่ต้องการ',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Colors.white70,
@@ -89,7 +89,7 @@ class WelcomeScreen extends StatelessWidget {
                             );
                           },
                           child: const Text(
-                            'Log in',
+                            'เข้าสู่ระบบ',
                             style: TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.w500),
                           ),
