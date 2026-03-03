@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-// student_model not needed in this screen
-import '/features/components/student_card.dart'; // provides ScholarshipCardItem & StudentCard widget
+import '/features/components/student_card.dart';
+import '/features/student/screens/form/scholarship_form_step1.dart';
 
 class ScholarshipDetailScreen extends StatelessWidget {
   final ScholarshipCardItem item;
@@ -99,7 +99,15 @@ class ScholarshipDetailScreen extends StatelessWidget {
                   ),
                   elevation: 0,
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  // Navigate to multi-step scholarship application form
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const ScholarshipFormStep1(),
+                    ),
+                  );
+                },
                 child: const Text(
                   'สมัครทุนนี้',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -114,7 +122,6 @@ class ScholarshipDetailScreen extends StatelessWidget {
   }
 }
 
-/* ส่วน widget ย่อยของเธอใช้เหมือนเดิมได้เลย */
 class _SectionCard extends StatelessWidget {
   final String title;
   final Widget child;
@@ -160,7 +167,6 @@ class _BottomNavBar extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: const [
           _NavItem(icon: Icons.home_outlined, label: 'Home'),
-          // use a consistent "school" icon instead of star for Scholar tab
           _NavItem(
             icon: Icons.school_outlined,
             label: 'Scholar',
