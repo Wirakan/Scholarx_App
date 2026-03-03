@@ -75,7 +75,7 @@ class ScholarshipFormSuccess extends StatelessWidget {
                     const SizedBox(height: 24),
 
                     // Application details card
-                    Container(
+                  Container(
                       width: double.infinity,
                       decoration: BoxDecoration(
                         color: Colors.white,
@@ -84,16 +84,29 @@ class ScholarshipFormSuccess extends StatelessWidget {
                       padding: const EdgeInsets.all(20),
                       child: Column(
                         children: [
-                          Text('หมายเลขการสมัคร:', style: AppTextStyle.caption),
-                          const SizedBox(height: 4),
-                          Text(
-                            'AP011001',
-                            style: AppTextStyle.heading2.copyWith(
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          Row(
+                            mainAxisAlignment:
+                                MainAxisAlignment.center, // ← จัดกลาง
+                            children: [
+                              Text(
+                                'หมายเลขการสมัคร:',
+                                style: AppTextStyle.caption.copyWith(fontSize: 14),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'AP011001',
+                                style: AppTextStyle.heading2.copyWith(
+                                  fontSize: 19,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
-                          const Divider(height: 24),
+                          const Divider(
+                            height: 24,
+                            color: AppColors.border,
+                          ), // ← สีอ่อน
                           _InfoRow('ทุนที่สมัคร', 'ทุนด้านเทคโนโลยีดิจิทัล'),
                           const SizedBox(height: 10),
                           _InfoRow('จำนวนเงิน', '10,000'),
