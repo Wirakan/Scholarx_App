@@ -246,8 +246,8 @@ class _BottomNavBar extends StatelessWidget {
         children: [
           _NavItem(icon: Icons.home_outlined, label: 'Home'),
           _NavItem(icon: Icons.star_outline, label: 'Scholar', isActive: true),
-          _NavItem(icon: Icons.description_outlined, label: 'Document'),
-          _NavItem(icon: Icons.notifications_outlined, label: 'Notification'),
+          _NavItem(icon: Icons.description_outlined, label: 'Tracking'),
+          _NavItem(icon: Icons.notifications_outlined, label: 'Alert'),
           _NavItem(icon: Icons.person_outline, label: 'Profile'),
         ],
       ),

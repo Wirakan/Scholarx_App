@@ -62,8 +62,8 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                 setState(() => _selectedIndex = 1), // ← ส่ง callback
           ),
           const ScholarScreen(), // ← เปลี่ยนจาก _PlaceholderTab เป็น ScholarScreen
-          const _PlaceholderTab(label: 'Document'),
-          const _PlaceholderTab(label: 'Notification'),
+          const _PlaceholderTab(label: 'Tracking'),
+          const _PlaceholderTab(label: 'Alert'),
           StudentProfileScreen(student: _student),
         ],
       ),
