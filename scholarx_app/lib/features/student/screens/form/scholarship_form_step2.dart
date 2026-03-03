@@ -90,8 +90,10 @@ class _ScholarshipFormStep2State extends State<ScholarshipFormStep2> {
                         'กรอกข้อมูลครอบครัวให้ครบถ้วนเพื่อประกอบการพิจารณาทุน',
                   ),
                   // FATHER
+// FATHER
                   FormSectionCard(
                     icon: Icons.person_outline,
+                    iconBorderRadius: BorderRadius.circular(8), // ← เพิ่ม
                     title: 'ข้อมูลบิดา',
                     children: [
                       FormTextField(
@@ -131,6 +133,7 @@ class _ScholarshipFormStep2State extends State<ScholarshipFormStep2> {
                   // MOTHER
                   FormSectionCard(
                     icon: Icons.person_outline,
+                    iconBorderRadius: BorderRadius.circular(8), // ← เพิ่ม
                     title: 'ข้อมูลมารดา',
                     children: [
                       FormTextField(
@@ -170,6 +173,7 @@ class _ScholarshipFormStep2State extends State<ScholarshipFormStep2> {
                   // FAMILY STATUS
                   FormSectionCard(
                     icon: Icons.favorite_outline,
+                    iconBorderRadius: BorderRadius.circular(8), // ← เพิ่ม
                     title: 'สถานะครอบครัว',
                     iconBgColor: const Color(0xFFFFF0F0),
                     children: [

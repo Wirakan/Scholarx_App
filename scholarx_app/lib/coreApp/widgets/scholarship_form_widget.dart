@@ -190,6 +190,7 @@ class FormSectionCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final Color iconBgColor;
+  final BorderRadius iconBorderRadius; // เพิ่ม
   final List<Widget> children;
 
   const FormSectionCard({
@@ -197,6 +198,9 @@ class FormSectionCard extends StatelessWidget {
     required this.icon,
     required this.title,
     this.iconBgColor = const Color(0xFFFFF0E8),
+    this.iconBorderRadius = const BorderRadius.all(
+      Radius.circular(999),
+    ), // default วงกลม
     required this.children,
   });
 
@@ -220,7 +224,8 @@ class FormSectionCard extends StatelessWidget {
                 height: 32,
                 decoration: BoxDecoration(
                   color: iconBgColor,
-                  shape: BoxShape.circle,
+                  borderRadius:
+                      iconBorderRadius, // ← เปลี่ยนจาก shape: BoxShape.circle
                 ),
                 child: Icon(icon, color: AppColors.primary, size: 18),
               ),

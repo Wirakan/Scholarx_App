@@ -42,8 +42,11 @@ class _ScholarshipFormStep1State extends State<ScholarshipFormStep1> {
                     message:
                         'กรุณาตรวจสอบความถูกต้องของข้อมูลก่อนกดถัดไป ข้อมูลที่มีเครื่องหมาย * จำเป็นต้องกรอก',
                   ),
-                  FormSectionCard(
+FormSectionCard(
                     icon: Icons.person_outline,
+                    iconBorderRadius: BorderRadius.circular(
+                      8,
+                    ), // ← เพิ่มบรรทัดนี้
                     title: 'ข้อมูลส่วนตัว',
                     children: [
                       FormTextField(
@@ -77,6 +80,9 @@ class _ScholarshipFormStep1State extends State<ScholarshipFormStep1> {
                   ),
                   FormSectionCard(
                     icon: Icons.home_outlined,
+                    iconBorderRadius: BorderRadius.circular(
+                      8,
+                    ), // ← เพิ่มบรรทัดนี้
                     title: 'ที่อยู่',
                     iconBgColor: const Color(0xFFFFF0E8),
                     children: [
