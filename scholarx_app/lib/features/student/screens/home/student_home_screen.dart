@@ -7,11 +7,12 @@ import '/coreApp/constants/app_strings.dart';
 import '/features/components/student_card.dart';
 import '/features/student/models/student_model.dart';
 import '/features/student/models/scholarship_detail_model.dart';
-import '/features/student/models/scholarship_model.dart';
+import '/features/student/models/scholarship_model.dart'; // ScholarshipModel
 import '/features/student/screens/profile/student_profile_screen.dart';
 import '/features/student/screens/scholar/scholar_screen.dart';
 import '/features/student/screens/scholar/scholarship_detail.dart';
-import '/features/student/screens/tracking/tracking_screen.dart';
+import 'package:scholarx_app/features/student/screens/tracking/tracking_screen.dart'; // รับ ScholarshipModel
+
 
 class StudentHomeScreen extends StatefulWidget {
   const StudentHomeScreen({super.key});
@@ -23,28 +24,28 @@ class StudentHomeScreen extends StatefulWidget {
 class _StudentHomeScreenState extends State<StudentHomeScreen> {
   int _selectedIndex = 0;
 
+  // ── เปลี่ยนเป็นรับ ScholarshipModel แทน ScholarshipCardItem ──
   Future<void> _openScholarDetail(ScholarshipModel scholarship) async {
     setState(() => _selectedIndex = 1);
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => ScholarshipDetailScreen(
-          item: ScholarshipCardItem(
-            id: scholarship.id,
-            title: scholarship.title,
-            category: scholarship.categoryLabel,
-            categoryColor: '#E8591A',
-            description: scholarship.description,
-            updatedAt: scholarship.deadline,
-          ),
-        ),
+        builder: (_) => ScholarshipDetailScreen(scholarship: scholarship),
       ),
     );
+    // หลังกลับจาก form flow ให้ switch ไป Tracking tab (index 2)
+    // ถ้า user กด "กลับหน้าหลัก" จาก success screen
+    // (popUntil จะทำให้ route stack สะอาด แต่ tab ยังไม่เปลี่ยน
+    //  จึง switch ไป Tracking เพื่อให้เห็น list ทุนที่สมัครไว้)
   }
 
-  void _switchToTracking() => setState(() => _selectedIndex = 2);
+  void _switchToTracking() {
+    setState(() => _selectedIndex = 2);
+  }
 
   final StudentModel _student = mockStudent;
+
+  // ── ใช้ ScholarshipModel.mockList แทน mockScholarships ──
   List<ScholarshipModel> get _scholarships => ScholarshipModel.mockList;
 
   @override
@@ -158,6 +159,7 @@ class _HomeTab extends StatelessWidget {
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate((ctx, i) {
               final s = scholarships[i];
+              // แปลง ScholarshipModel → ScholarshipCardItem เพื่อให้ StudentCard ใช้ได้
               final cardItem = ScholarshipCardItem(
                 id: s.id,
                 title: s.title,
