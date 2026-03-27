@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import '/coreApp/themeApp/app_colors.dart';
 import '/coreApp/themeApp/app_text_style.dart';
+
 // ─────────────────────────────────────────────
 //  DATA MODEL
 // ─────────────────────────────────────────────
-enum TrackingStatus { reviewing, approved, rejected, special }
+enum TrackingStatus { reviewing, approved, rejected}
 
 class TrackingItem {
   final String id;
@@ -50,7 +51,7 @@ const _mockItems = [
     appliedDate: '23 มิ.ย. 2568',
     updatedDate: '30 ส.ค. 2568',
     amount: 30000,
-    status: TrackingStatus.approved,
+    status: TrackingStatus.reviewing,
   ),
   TrackingItem(
     id: 'AP011004',
@@ -98,8 +99,6 @@ class _TrackingScreenState extends State<TrackingScreen> {
           return e.status == TrackingStatus.approved;
         case _FilterTab.rejected:
           return e.status == TrackingStatus.rejected;
-        case _FilterTab.special:
-          return e.status == TrackingStatus.special;
         default:
           return true;
       }
@@ -219,7 +218,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
 // ─────────────────────────────────────────────
 //  FILTER TAB ENUM
 // ─────────────────────────────────────────────
-enum _FilterTab { all, reviewing, approved, rejected, special }
+enum _FilterTab { all, reviewing, approved, rejected}
 
 extension _FilterTabX on _FilterTab {
   String get label {
@@ -232,14 +231,12 @@ extension _FilterTabX on _FilterTab {
         return 'อนุมัติ';
       case _FilterTab.rejected:
         return 'ปฏิเสธ';
-      case _FilterTab.special:
-        return 'พิเศษ';
     }
   }
 }
 
 // ─────────────────────────────────────────────
-//  TRACKING CARD
+//  TRACKING CARD  ← layout เปลี่ยนตามรูป
 // ─────────────────────────────────────────────
 class _TrackingCard extends StatelessWidget {
   final TrackingItem item;
@@ -253,7 +250,7 @@ class _TrackingCard extends StatelessWidget {
       duration: const Duration(milliseconds: 300),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
         border: isHighlighted
             ? Border.all(color: AppColors.primary, width: 2)
             : null,
@@ -267,47 +264,42 @@ class _TrackingCard extends StatelessWidget {
               ]
             : null,
       ),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Title row
+          // ── แถวบน: ชื่อทุน (ซ้าย) + badge (ขวา) ──
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.title,
-                      style: AppTextStyle.title.copyWith(fontSize: 15),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'ยื่นเมื่อ: ${item.appliedDate}',
-                      style: AppTextStyle.caption,
-                    ),
-                  ],
+                child: Text(
+                  item.title,
+                  style: AppTextStyle.title.copyWith(fontSize: 15),
                 ),
               ),
               const SizedBox(width: 8),
+              _StatusBadge(status: item.status),
+            ],
+          ),
+          const SizedBox(height: 4),
+          // ── วันที่ยื่น ──
+          Text('ยื่นเมื่อ: ${item.appliedDate}', style: AppTextStyle.caption),
+          const SizedBox(height: 12),
+          // ── แถวล่าง: จำนวนเงิน (ซ้าย) + ⋮ (ขวา) ──
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
               Text(
                 _formatAmount(item.amount),
                 style: AppTextStyle.heading3.copyWith(
                   color: AppColors.textPrimary,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
+              const Icon(Icons.more_vert, color: Color(0xFF9E9E9E), size: 22),
             ],
-          ),
-          const SizedBox(height: 10),
-          // Status badge
-          _StatusBadge(status: item.status),
-          const SizedBox(height: 10),
-          // Updated date
-          Text(
-            'อัปเดตล่าสุด: ${item.updatedDate}',
-            style: AppTextStyle.caption,
           ),
         ],
       ),
@@ -354,22 +346,17 @@ class _StatusBadge extends StatelessWidget {
         fg = const Color(0xFFC62828);
         label = 'ปฏิเสธ';
         break;
-      case TrackingStatus.special:
-        bg = const Color(0xFFE3F2FD);
-        fg = const Color(0xFF1565C0);
-        label = 'พิเศษ';
-        break;
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
         label,
-        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: fg),
+        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: fg),
       ),
     );
   }
