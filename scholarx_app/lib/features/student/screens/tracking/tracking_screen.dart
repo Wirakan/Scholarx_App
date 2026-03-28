@@ -5,7 +5,7 @@ import '/coreApp/themeApp/app_text_style.dart';
 // ─────────────────────────────────────────────
 //  DATA MODEL
 // ─────────────────────────────────────────────
-enum TrackingStatus { reviewing, approved, rejected}
+enum TrackingStatus { reviewing, approved, rejected, special }
 
 class TrackingItem {
   final String id;
@@ -36,14 +36,6 @@ const _mockItems = [
     updatedDate: '20 ม.ค. 2569',
     amount: 10000,
     status: TrackingStatus.reviewing,
-  ),
-  TrackingItem(
-    id: 'AP011002',
-    title: 'ทุนผู้ช่วยเพื่อพัฒนาทักษะวิชาชีพ',
-    appliedDate: '05 มี.ค. 2568',
-    updatedDate: '24 มี.ค. 2568',
-    amount: 25000,
-    status: TrackingStatus.approved,
   ),
   TrackingItem(
     id: 'AP011003',
@@ -99,6 +91,8 @@ class _TrackingScreenState extends State<TrackingScreen> {
           return e.status == TrackingStatus.approved;
         case _FilterTab.rejected:
           return e.status == TrackingStatus.rejected;
+        case _FilterTab.special:
+          return e.status == TrackingStatus.special;
         default:
           return true;
       }
@@ -218,7 +212,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
 // ─────────────────────────────────────────────
 //  FILTER TAB ENUM
 // ─────────────────────────────────────────────
-enum _FilterTab { all, reviewing, approved, rejected}
+enum _FilterTab { all, reviewing, approved, rejected, special }
 
 extension _FilterTabX on _FilterTab {
   String get label {
@@ -231,6 +225,8 @@ extension _FilterTabX on _FilterTab {
         return 'อนุมัติ';
       case _FilterTab.rejected:
         return 'ปฏิเสธ';
+      case _FilterTab.special:
+        return 'พิเศษ';
     }
   }
 }
@@ -345,6 +341,11 @@ class _StatusBadge extends StatelessWidget {
         bg = const Color(0xFFFFEBEE);
         fg = const Color(0xFFC62828);
         label = 'ปฏิเสธ';
+        break;
+      case TrackingStatus.special:
+        bg = const Color(0xFFE3F2FD);
+        fg = const Color(0xFF1565C0);
+        label = 'พิเศษ';
         break;
     }
 
