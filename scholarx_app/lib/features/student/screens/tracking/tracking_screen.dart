@@ -91,8 +91,6 @@ class _TrackingScreenState extends State<TrackingScreen> {
           return e.status == TrackingStatus.approved;
         case _FilterTab.rejected:
           return e.status == TrackingStatus.rejected;
-        case _FilterTab.special:
-          return e.status == TrackingStatus.special;
         default:
           return true;
       }
@@ -212,7 +210,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
 // ─────────────────────────────────────────────
 //  FILTER TAB ENUM
 // ─────────────────────────────────────────────
-enum _FilterTab { all, reviewing, approved, rejected, special }
+enum _FilterTab { all, reviewing, approved, rejected }
 
 extension _FilterTabX on _FilterTab {
   String get label {
@@ -225,8 +223,6 @@ extension _FilterTabX on _FilterTab {
         return 'อนุมัติ';
       case _FilterTab.rejected:
         return 'ปฏิเสธ';
-      case _FilterTab.special:
-        return 'พิเศษ';
     }
   }
 }
@@ -289,7 +285,7 @@ class _TrackingCard extends StatelessWidget {
               Text(
                 _formatAmount(item.amount),
                 style: AppTextStyle.heading3.copyWith(
-                  color: AppColors.textPrimary,
+                  color: AppColors.primary,
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
                 ),
