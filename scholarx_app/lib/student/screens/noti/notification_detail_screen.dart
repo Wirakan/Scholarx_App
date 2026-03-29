@@ -15,9 +15,9 @@ class NotificationDetailScreen extends StatelessWidget {
   Color _statusColor(ApplicationStatus status) {
     switch (status) {
       case ApplicationStatus.pending:
-        return Colors.orange;
+        return Color(0xFFFF6B35);
       case ApplicationStatus.reviewing:
-        return Colors.amber;
+        return Color(0xFFFF6B35);
       case ApplicationStatus.approved:
         return Colors.green;
       case ApplicationStatus.rejected:

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import '/shared/application_repository.dart';
 
 enum NotificationType { status, announcement }
@@ -67,6 +68,40 @@ class NotificationModel {
         return 'อนุมัติแล้ว';
       case ApplicationStatus.rejected:
         return 'ไม่ผ่านการพิจารณา';
+    }
+  }
+
+  IconData get icon {
+    if (type == NotificationType.announcement) {
+      return Icons.campaign_outlined;
+    }
+
+    switch (status) {
+      case ApplicationStatus.pending:
+        return Icons.schedule_outlined;
+      case ApplicationStatus.reviewing:
+        return Icons.access_time_filled_rounded;
+      case ApplicationStatus.approved:
+        return Icons.check_circle_outline_rounded;
+      case ApplicationStatus.rejected:
+        return Icons.cancel_outlined;
+    }
+  }
+
+  Color get iconColor {
+    if (type == NotificationType.announcement) {
+      return const Color(0xFF7B2FF7);
+    }
+
+    switch (status) {
+      case ApplicationStatus.pending:
+        return const Color(0xFFFF6B35);
+      case ApplicationStatus.reviewing:
+        return const Color(0xFFFF6B35);
+      case ApplicationStatus.approved:
+        return const Color(0xFF16A34A);
+      case ApplicationStatus.rejected:
+        return const Color(0xFFDC2626);
     }
   }
 }
