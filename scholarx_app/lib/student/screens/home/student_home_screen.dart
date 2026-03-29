@@ -58,12 +58,16 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
       body: IndexedStack(
         index: _selectedIndex,
         children: [
-          _HomeTab(
+        _HomeTab(
             student: _student,
             scholarships: _scholarships,
             onGoToScholar: () => setState(() => _selectedIndex = 1),
             onGoToTracking: _switchToTracking,
             onOpenScholarDetail: _openScholarDetail,
+            onOpenAlert: () => setState(() {
+              _selectedIndex = 3;
+              _selectedNotification = null;
+            }),
           ),
           const ScholarScreen(),
           TrackingScreen(
@@ -101,6 +105,7 @@ class _HomeTab extends StatelessWidget {
   final List<ScholarshipModel> scholarships;
   final VoidCallback onGoToScholar;
   final VoidCallback onGoToTracking;
+  final VoidCallback onOpenAlert;
   final void Function(ScholarshipModel) onOpenScholarDetail;
 
   const _HomeTab({
@@ -108,6 +113,7 @@ class _HomeTab extends StatelessWidget {
     required this.scholarships,
     required this.onGoToScholar,
     required this.onGoToTracking,
+    required this.onOpenAlert,
     required this.onOpenScholarDetail,
   });
 
@@ -115,7 +121,9 @@ class _HomeTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomScrollView(
       slivers: [
-        SliverToBoxAdapter(child: _ProfileHeader(student: student)),
+        SliverToBoxAdapter(
+          child: _ProfileHeader(student: student, onOpenAlert: onOpenAlert),
+        ),
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
           sliver: SliverToBoxAdapter(
@@ -201,7 +209,9 @@ class _HomeTab extends StatelessWidget {
 // ─── Profile Header ───────────────────────────────────────────────────────────
 class _ProfileHeader extends StatelessWidget {
   final StudentModel student;
-  const _ProfileHeader({required this.student});
+  final VoidCallback onOpenAlert;
+
+  const _ProfileHeader({required this.student, required this.onOpenAlert});
 
   @override
   Widget build(BuildContext context) {
@@ -247,7 +257,7 @@ class _ProfileHeader extends StatelessWidget {
                   color: Colors.white,
                   size: 26,
                 ),
-                onPressed: () {},
+                onPressed: onOpenAlert,
               ),
               Positioned(
                 right: 8,
