@@ -517,21 +517,19 @@
 //   }
 // }
 
-
 import 'package:flutter/material.dart';
 import '/coreApp/themeApp/app_colors.dart';
 import '/coreApp/themeApp/app_text_style.dart';
 import '/coreApp/constants/app_strings.dart';
 import '../../components/student_card.dart';
 import '/student/models/student_model.dart';
+import '/student/models/notification_model.dart';
 import '/student/models/scholarship_detail_model.dart';
-import '/student/models/scholarship_model.dart'; // ScholarshipModel
 import '/student/screens/profile/student_profile_screen.dart';
 import '/student/screens/scholar/scholar_screen.dart';
-import '/student/screens/scholar/scholarship_detail.dart';
-import '/student/screens/tracking/tracking_screen.dart'; // รับ ScholarshipModel
-import '/student/screens/notification/notification_screen.dart';
-import '/student/screens/notification/notification_detail_screen.dart';
+import '/student/screens/tracking/tracking_screen.dart';
+import '/student/screens/noti/notification_screen.dart';
+import '/student/screens/noti/notification_detail_screen.dart';
 
 class StudentHomeScreen extends StatefulWidget {
   const StudentHomeScreen({super.key});
@@ -547,6 +545,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
 
   static const List<ScholarshipCardItem> _scholarships = [
     ScholarshipCardItem(
+      id: 'sch_001',
       title: 'ทุนการศึกษาเพื่อความเป็นเลิศทางวิชาการ',
       category: 'สำหรับนักศึกษาระดับปริญญาตรี',
       categoryColor: '#E8591A',
@@ -555,6 +554,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
       updatedAt: '1 ม.ค. 2569',
     ),
     ScholarshipCardItem(
+      id: 'sch_002',
       title: 'ประกาศผลผู้ได้รับทุน รอบที่ 1',
       category: 'ประจำปีการศึกษา 2569',
       categoryColor: '#E8591A',
@@ -563,6 +563,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
       updatedAt: '1 ม.ค. 2569',
     ),
     ScholarshipCardItem(
+      id: 'sch_003',
       title: 'ทุนด้านเทคโนโลยีดิจิทัล',
       category: 'ทุนเฉพาะทาง Digital / IT / Engineering',
       categoryColor: '#E8591A',
@@ -603,7 +604,6 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
         selectedIndex: _selectedIndex,
         onTap: (i) => setState(() {
           _selectedIndex = i;
-          // เคลียร์ detail เมื่อกด tab notification ใหม่
           if (i == 3) _selectedNotification = null;
         }),
       ),

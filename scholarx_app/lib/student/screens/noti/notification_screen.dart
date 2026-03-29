@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:scholarx_app/features/student/models/notification_model.dart';
+import '/student/models/notification_model.dart';
 
 // ===== MOCK DATA (replace with API/provider) =====
 final List<NotificationItem> _mockNotifications = [
