@@ -71,7 +71,7 @@ class NotificationModel {
     }
   }
 
-  IconData get icon {
+IconData get icon {
     if (type == NotificationType.announcement) {
       return Icons.campaign_outlined;
     }
@@ -80,7 +80,7 @@ class NotificationModel {
       case ApplicationStatus.pending:
         return Icons.schedule_outlined;
       case ApplicationStatus.reviewing:
-        return Icons.access_time_filled_rounded;
+        return Icons.assignment_outlined; // ✅ ใช้แบบเก่า
       case ApplicationStatus.approved:
         return Icons.check_circle_outline_rounded;
       case ApplicationStatus.rejected:
@@ -95,9 +95,9 @@ class NotificationModel {
 
     switch (status) {
       case ApplicationStatus.pending:
-        return const Color(0xFFFF6B35);
+        return const Color(0xFFE07A5F);
       case ApplicationStatus.reviewing:
-        return const Color(0xFFFF6B35);
+        return const Color(0xFFE07A5F);
       case ApplicationStatus.approved:
         return const Color(0xFF16A34A);
       case ApplicationStatus.rejected:

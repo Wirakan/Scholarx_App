@@ -130,9 +130,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
   Color _statusColor(ApplicationStatus status) {
     switch (status) {
       case ApplicationStatus.pending:
-        return const Color(0xFFF59E0B);
+        return const Color(0xFFFF6B35);
       case ApplicationStatus.reviewing:
-        return const Color(0xFFF59E0B);
+        return const Color(0xFFFF6B35);
       case ApplicationStatus.approved:
         return const Color(0xFF16A34A);
       case ApplicationStatus.rejected:
@@ -143,9 +143,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
   IconData _statusIcon(ApplicationStatus status) {
     switch (status) {
       case ApplicationStatus.pending:
-        return Icons.schedule_outlined;
+        return Icons.assignment_outlined;
       case ApplicationStatus.reviewing:
-        return Icons.hourglass_top_rounded;
+        return Icons.assignment_outlined;
       case ApplicationStatus.approved:
         return Icons.check_circle_outline_rounded;
       case ApplicationStatus.rejected:

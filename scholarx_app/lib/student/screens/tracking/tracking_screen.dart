@@ -124,8 +124,9 @@ class _TrackingScreenState extends State<TrackingScreen> {
         children: [
           Text(
             'ติดตามทุน',
-            style: AppTextStyle.heading2.copyWith(
+            style: TextStyle(
               color: Colors.white,
+              fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -227,9 +228,9 @@ class _TrackingCard extends StatelessWidget {
   Color _statusColor(ApplicationStatus status) {
     switch (status) {
       case ApplicationStatus.pending:
-        return const Color(0xFFF59E0B);
+        return const Color(0xFFE07A5F);
       case ApplicationStatus.reviewing:
-        return const Color(0xFFF59E0B);
+        return const Color(0xFFE07A5F);
       case ApplicationStatus.approved:
         return const Color(0xFF16A34A);
       case ApplicationStatus.rejected:
@@ -240,9 +241,9 @@ class _TrackingCard extends StatelessWidget {
   IconData _statusIcon(ApplicationStatus status) {
     switch (status) {
       case ApplicationStatus.pending:
-        return Icons.schedule_outlined;
+        return Icons.assignment_outlined;
       case ApplicationStatus.reviewing:
-        return Icons.hourglass_top_rounded;
+        return Icons.assignment_outlined;
       case ApplicationStatus.approved:
         return Icons.check_circle_outline_rounded;
       case ApplicationStatus.rejected:
