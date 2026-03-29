@@ -1,95 +1,137 @@
 import 'package:flutter/material.dart';
-import '../widgets/scholarx_logo.dart';
 
-class WelcomeScreen extends StatelessWidget {
+class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
 
-  // ── Design tokens (เดียวกับ SelectRoleScreen) ──
+  @override
+  State<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
+  // ── Design tokens ──
   static const Color primaryOrange = Color(0xFFFF6B1A);
   static const Color lightOrange = Color(0xFFFFB347);
   static const Color darkOrange = Color(0xFFD94A00);
 
+  static const Color primaryPurple = Color(0xFF7B3FE4);
+  static const Color lightPurple = Color(0xFF9B6FFF);
+  static const Color darkPurple = Color(0xFF4A1FA0);
+
+  String? _selectedRole;
+
+  void _onContinue() {
+    if (_selectedRole == null) return;
+    if (_selectedRole == 'student') {
+      Navigator.pushNamed(context, '/student/login');
+    } else {
+      Navigator.pushNamed(context, '/admin/splash');
+    }
+  }
+
+  // ── Hero gradient based on selected role ──
+  LinearGradient get _heroGradient {
+    if (_selectedRole == 'admin') {
+      return const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [lightPurple, primaryPurple, darkPurple],
+      );
+    }
+    return const LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [lightOrange, primaryOrange, darkOrange],
+    );
+  }
+
+  Color get _heroIconColor {
+    if (_selectedRole == 'admin') return primaryPurple;
+    return primaryOrange;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Column(
         children: [
-          // ── Hero gradient (เดียวกับ SelectRole) ──
           _buildHeroSection(),
-
-          // ── Content ส่วนล่าง ──
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
                   _buildTitle(),
-                  const SizedBox(height: 32),
-                  const Text(
-                    'เลือกบทบาท',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.grey,
-                      letterSpacing: 1.0,
+                  const SizedBox(height: 28),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: const Text(
+                      'เลือกบทบาท',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.grey,
+                        letterSpacing: 1.0,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  // ── ปุ่มนักศึกษา ──
-                  _buildRoleButton(
-                    context,
+                  const SizedBox(height: 14),
+                  _buildRoleCard(
+                    roleKey: 'student',
                     icon: Icons.school_rounded,
                     title: 'นักศึกษา',
                     subtitle: 'ค้นหาทุน / สมัครทุน / ติดตามสถานะ',
-                    color: primaryOrange,
-                    onTap: () => Navigator.pushNamed(context, '/student/login'),
+                    solidColor: primaryOrange,
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [lightOrange, primaryOrange, darkOrange],
+                    ),
                   ),
-                  // ── ปุ่มผู้ดูแลระบบ ──
-                  _buildRoleButton(
-                    context,
+                  _buildRoleCard(
+                    roleKey: 'admin',
                     icon: Icons.shield_rounded,
                     title: 'ผู้ดูแลระบบ',
                     subtitle: 'จัดการข้อมูล / อนุมัติคำร้อง / ดูรายงาน',
-                    color: const Color(0xFF6B3FA0),
-                    onTap: () => Navigator.pushNamed(context, '/admin/splash'),
+                    solidColor: primaryPurple,
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [lightPurple, primaryPurple, darkPurple],
+                    ),
                   ),
                   const SizedBox(height: 24),
                 ],
               ),
             ),
           ),
+          _buildContinueButton(),
         ],
       ),
     );
   }
 
-  // ── Hero Section: gradient + decorative circles + logo ──
+  // ── Hero Section (animated gradient) ──
   Widget _buildHeroSection() {
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeInOut,
       height: 280,
       width: double.infinity,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [lightOrange, primaryOrange, darkOrange],
-        ),
-      ),
+      decoration: BoxDecoration(gradient: _heroGradient),
       child: Stack(
         children: [
-          // วงกลม decorative ขวาบน
           Positioned(top: -40, right: -30, child: _buildDecorativeCircle(180)),
-          // วงกลม decorative ซ้ายล่าง
           Positioned(bottom: 20, left: -20, child: _buildDecorativeCircle(100)),
-          // Logo + app name กลาง
           Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const SizedBox(height: 40),
-                Container(
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 400),
                   width: 64,
                   height: 64,
                   decoration: BoxDecoration(
@@ -103,9 +145,11 @@ class WelcomeScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: const Icon(
-                    Icons.school_rounded,
-                    color: primaryOrange,
+                  child: Icon(
+                    _selectedRole == 'admin'
+                        ? Icons.shield_rounded
+                        : Icons.school_rounded,
+                    color: _heroIconColor,
                     size: 36,
                   ),
                 ),
@@ -147,7 +191,6 @@ class WelcomeScreen extends StatelessWidget {
     );
   }
 
-  // ── Title + subtitle ──
   Widget _buildTitle() {
     return Column(
       children: [
@@ -160,9 +203,9 @@ class WelcomeScreen extends StatelessWidget {
               color: Color(0xFF1A1A1A),
             ),
             children: [
-              TextSpan(text: 'Welcome To '),
+              TextSpan(text: 'ฉันคือ'),
               TextSpan(
-                text: 'ScholarX',
+                text: '...',
                 style: TextStyle(color: primaryOrange),
               ),
             ],
@@ -170,7 +213,7 @@ class WelcomeScreen extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         const Text(
-          'การเรียนของคุณควรมีการสนับสนุนที่ใช่\nค้นพบโอกาสใหม่ ๆ ที่ช่วยให้คุณเข้าใกล้อนาคตที่ต้องการ',
+          'เลือกบทบาทของคุณเพื่อใช้งานระบบ',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 13.5,
@@ -183,73 +226,146 @@ class WelcomeScreen extends StatelessWidget {
     );
   }
 
-  // ── Role Card (style เดียวกับ SelectRole — tap ไปยัง route โดยตรง ไม่มี state) ──
-  Widget _buildRoleButton(
-    BuildContext context, {
+  // ── Role Card with gradient support ──
+  Widget _buildRoleCard({
+    required String roleKey,
     required IconData icon,
     required String title,
     required String subtitle,
-    required Color color,
-    required VoidCallback onTap,
+    required Color solidColor,
+    required LinearGradient gradient,
   }) {
+    final bool isSelected = _selectedRole == roleKey;
+
     return GestureDetector(
-      onTap: onTap,
-      child: Container(
+      onTap: () => setState(() => _selectedRole = roleKey),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         margin: const EdgeInsets.only(bottom: 14),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
         decoration: BoxDecoration(
-          color: Colors.white,
+          gradient: isSelected ? gradient : null,
+          color: isSelected ? null : Colors.white,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: const Color(0xFFEEEEEE), width: 2),
+          border: Border.all(
+            color: isSelected ? Colors.transparent : const Color(0xFFEEEEEE),
+            width: 2,
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+              color: isSelected
+                  ? solidColor.withOpacity(0.35)
+                  : Colors.black.withOpacity(0.04),
+              blurRadius: isSelected ? 20 : 8,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
         child: Row(
           children: [
-            // Icon box
             Container(
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: const Color(0xFFF5F5F5),
+                color: isSelected
+                    ? Colors.white.withOpacity(0.25)
+                    : const Color(0xFFF5F5F5),
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: Icon(icon, color: color, size: 24),
+              child: Icon(
+                icon,
+                color: isSelected ? Colors.white : solidColor,
+                size: 24,
+              ),
             ),
             const SizedBox(width: 16),
-            // Title + subtitle
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
-                      color: Color(0xFF1A1A1A),
+                      color: isSelected
+                          ? Colors.white
+                          : const Color(0xFF1A1A1A),
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
-                      color: Colors.grey,
+                      color: isSelected
+                          ? Colors.white.withOpacity(0.85)
+                          : Colors.grey,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
               ),
             ),
-            // Arrow icon แทน checkbox (ไม่มี selection state)
-            Icon(Icons.arrow_forward_ios_rounded, color: color, size: 16),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isSelected ? Colors.white : Colors.transparent,
+                border: Border.all(
+                  color: isSelected ? Colors.white : Colors.grey.shade300,
+                  width: 2,
+                ),
+              ),
+              child: isSelected
+                  ? Icon(Icons.check_rounded, color: solidColor, size: 16)
+                  : null,
+            ),
           ],
+        ),
+      ),
+    );
+  }
+
+  // ── Continue Button ──
+  Widget _buildContinueButton() {
+    final bool enabled = _selectedRole != null;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 12, 24, 28),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 12,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: SizedBox(
+        width: double.infinity,
+        height: 54,
+        child: ElevatedButton(
+          onPressed: enabled ? _onContinue : null,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: enabled ? Colors.black : Colors.grey.shade300,
+            foregroundColor: Colors.white,
+            elevation: enabled ? 4 : 0,
+            shadowColor: Colors.black.withOpacity(0.4),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+          child: const Text(
+            'ดำเนินการต่อ',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.5,
+            ),
+          ),
         ),
       ),
     );
