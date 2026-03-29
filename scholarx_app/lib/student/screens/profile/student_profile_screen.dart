@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '/coreApp/themeApp/app_colors.dart';
 import '/coreApp/themeApp/app_text_style.dart';
 import '/student/models/student_model.dart';
+import '/screens/splash_screen.dart';
 
 class StudentProfileScreen extends StatelessWidget {
   final StudentModel student;
@@ -246,7 +247,20 @@ class _MenuSection extends StatelessWidget {
                   color: AppColors.textTertiary,
                   size: 20,
                 ),
-                onTap: () {},
+                onTap: () {
+                if (i == 4) {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      PageRouteBuilder(
+                        pageBuilder: (_, __, ___) => const SplashScreen(),
+                        transitionsBuilder: (_, anim, __, child) =>
+                            FadeTransition(opacity: anim, child: child),
+                        transitionDuration: const Duration(milliseconds: 600),
+                      ),
+                      (route) => false, // ลบ stack ทั้งหมด
+                    );
+                  }
+                },
               ),
               if (i < items.length - 1)
                 const Divider(
