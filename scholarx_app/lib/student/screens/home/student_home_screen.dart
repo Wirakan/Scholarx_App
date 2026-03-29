@@ -19,6 +19,7 @@ import '/student/models/scholarship_model.dart';
 import '/student/screens/tracking/tracking_screen.dart';
 import '/student/screens/noti/notification_screen.dart';
 import '/student/screens/noti/notification_detail_screen.dart';
+import '/student/screens/scholar/scholarship_detail.dart';
 
 class StudentHomeScreen extends StatefulWidget {
   const StudentHomeScreen({super.key});
