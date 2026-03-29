@@ -2,10 +2,66 @@ import 'package:flutter/material.dart';
 import '/coreApp/themeApp/app_colors.dart';
 import '/coreApp/themeApp/app_text_style.dart';
 import '/coreApp/widgets/scholarship_form_widget.dart';
+import '/shared/application_repository.dart';
+import '/student/models/student_model.dart';
 import 'scholarship_form_success.dart';
 
+/// Step 5 — ตรวจสอบข้อมูล + Submit
+/// รับ formData ที่รวบรวมมาตลอด 4 step
 class ScholarshipFormStep5 extends StatelessWidget {
-  const ScholarshipFormStep5({super.key});
+  final ScholarshipFormData formData;
+
+  const ScholarshipFormStep5({super.key, required this.formData});
+
+  ApplicationRecord _buildRecord() {
+    final repo = ApplicationRepository.instance;
+    final student = StudentModel.mock;
+    return ApplicationRecord(
+      id: repo.generateId(),
+      scholarshipId: formData.scholarshipId,
+      scholarshipName: formData.scholarshipName,
+      amount: formData.amount,
+      // ── Step 1 ──
+      studentId: formData.studentId,
+      fullName: formData.fullName,
+      phone: formData.phone,
+      email: formData.email,
+      address: formData.address,
+      // ── Step 2 ──
+      fatherName: formData.fatherName,
+      fatherPhone: formData.fatherPhone,
+      fatherJob: formData.fatherJob,
+      fatherIncome: formData.fatherIncome,
+      motherName: formData.motherName,
+      motherPhone: formData.motherPhone,
+      motherJob: formData.motherJob,
+      motherIncome: formData.motherIncome,
+      familyStatus: formData.familyStatus,
+      siblingCount: formData.siblingCount,
+      applicantOrder: formData.applicantOrder,
+      applicantIncome: formData.applicantIncome,
+      totalFamilyIncome: formData.totalFamilyIncome,
+      familyNote: formData.familyNote,
+      // ── Step 3 ──
+      guardianName: formData.guardianName,
+      guardianRelation: formData.guardianRelation,
+      guardianPhone: formData.guardianPhone,
+      guardianJob: formData.guardianJob,
+      guardianIncome: formData.guardianIncome,
+      // ── Step 4 ──
+      uploadedDocuments: formData.uploadedDocuments,
+      // ── Student profile ──
+      faculty: student.faculty,
+      major: student.major,
+      year: 'ปี 3',
+      gpa: student.gpa,
+      reason: formData.familyNote.isNotEmpty
+          ? formData.familyNote
+          : 'ต้องการทุนการศึกษาเพื่อสนับสนุนค่าใช้จ่ายในการเรียน',
+      appliedAt: DateTime.now(),
+      status: ApplicationStatus.pending,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,74 +81,57 @@ class ScholarshipFormStep5 extends StatelessWidget {
                   const FormInfoBanner(
                     message: 'กรุณาตรวจสอบความถูกต้องของข้อมูลก่อนยืนยัน',
                   ),
-                  // Personal info
+                  // ── ข้อมูลส่วนตัว ──
                   _ReviewCard(
                     icon: Icons.person_outline,
                     title: 'ข้อมูลส่วนตัว',
-                    rows: const [
-                      _ReviewRow('รหัสนักศึกษา', '663040127-7'),
-                      _ReviewRow('นามสกุล', 'ธนวัฒน์ ประเสริฐ'),
-                      _ReviewRow('เบอร์โทรศัพท์', '012-345-6789'),
-                      _ReviewRow('อีเมล', 'thanawat.p@kkumail.com'),
-                      _ReviewRow(
-                        'ที่อยู่',
-                        '123 ถ.มิตรภาพ ต.ในเมือง อ.เมือง จ.ขอนแก่น 40000',
-                      ),
+                    rows: [
+                      _ReviewRow('รหัสนักศึกษา', formData.studentId),
+                      _ReviewRow('ชื่อ - นามสกุล', formData.fullName),
+                      _ReviewRow('เบอร์โทรศัพท์', formData.phone),
+                      _ReviewRow('อีเมล', formData.email),
+                      _ReviewRow('ที่อยู่', formData.address),
                     ],
                   ),
-                  // Family info
+                  // ── ข้อมูลครอบครัว ──
                   _ReviewCard(
                     icon: Icons.home_outlined,
                     title: 'ข้อมูลครอบครัว',
-                    rows: const [
-                      _ReviewRow('ชื่อ - นามสกุลบิดา', 'สหรัฐ ประเสริฐ'),
-                      _ReviewRow('เบอร์โทรศัพท์', '098-123-1456'),
-                      _ReviewRow('อาชีพ', 'ค้าขาย'),
-                      _ReviewRow('รายได้', '15,001 – 20,000'),
-                      _ReviewRow('ชื่อ - นามสกุลมิดา', 'สุภัทรา ประเสริฐ'),
-                      _ReviewRow('เบอร์โทรศัพท์', '098-765-5555'),
-                      _ReviewRow('อาชีพ', 'แม่บ้าน'),
-                      _ReviewRow('รายได้', '0 - 15,000'),
-                      _ReviewRow('สภาพครอบครัว', 'อยู่ด้วยกัน'),
-                      _ReviewRow(
-                        'รายได้ของผู้ครอบครัวต่อเดือน(บาท)',
-                        '20,001 – 30,000',
-                      ),
-                      _ReviewRow(
-                        'รายได้รวมของครอบครัว(บาท/ปี)',
-                        '200,000 - 300,000',
-                      ),
-                      _ReviewRow(
-                        'ข้อมูลเพิ่มเติม',
-                        'ครอบครัวมีรายได้หลักจากบิดาเพียงคนเดียวและมีภาระค่าใช้จ่ายด้านการศึกษาและค่าครองชีพที่ต้องการความช่วยเหลือด้านทุนการศึกษา',
-                      ),
+                    rows: [
+                      _ReviewRow('ชื่อ - นามสกุลบิดา', formData.fatherName),
+                      _ReviewRow('เบอร์โทร (บิดา)', formData.fatherPhone),
+                      _ReviewRow('อาชีพ (บิดา)', formData.fatherJob),
+                      _ReviewRow('รายได้ (บิดา)', formData.fatherIncome),
+                      _ReviewRow('ชื่อ - นามสกุลมารดา', formData.motherName),
+                      _ReviewRow('เบอร์โทร (มารดา)', formData.motherPhone),
+                      _ReviewRow('อาชีพ (มารดา)', formData.motherJob),
+                      _ReviewRow('รายได้ (มารดา)', formData.motherIncome),
+                      _ReviewRow('สภาพครอบครัว', formData.familyStatus),
+                      _ReviewRow('รายได้รวม (ปี)', formData.totalFamilyIncome),
                     ],
                   ),
-                  // Guardian info
+                  // ── ผู้อุปการะ ──
                   _ReviewCard(
                     icon: Icons.person_outline,
                     title: 'ข้อมูลผู้อุปการะ',
-                    rows: const [
-                      _ReviewRow('ชื่อ - นามสกุลผู้อุปการะ:', 'สมชาย ประเสริฐ'),
-                      _ReviewRow('ความสัมพันธ์กับผู้สมัคร', 'บิดา'),
-                      _ReviewRow('เบอร์โทรศัพท์', '098-765-4321'),
-                      _ReviewRow('อาชีพ', 'พนักงานบริษัทเอกชน'),
-                      _ReviewRow('รายได้', '15,001 – 20,000'),
+                    rows: [
+                      _ReviewRow('ชื่อ - นามสกุล', formData.guardianName),
+                      _ReviewRow('ความสัมพันธ์', formData.guardianRelation),
+                      _ReviewRow('เบอร์โทรศัพท์', formData.guardianPhone),
+                      _ReviewRow('อาชีพ', formData.guardianJob),
+                      _ReviewRow('รายได้', formData.guardianIncome),
                     ],
                   ),
-                  // Documents
+                  // ── เอกสาร ──
                   _ReviewCard(
                     icon: Icons.upload_file_outlined,
                     title: 'อัปโหลดเอกสาร',
                     iconBg: const Color(0xFFFFF3E0),
                     rows: const [],
                     customChild: Column(
-                      children: [
-                        _DocReviewRow('สำเนาบัตรประชาชน.pdf'),
-                        _DocReviewRow('รูปถ่ายหน้าตรง.JPEG'),
-                        _DocReviewRow('ใบแสดงผลการเรียน.pdf'),
-                        _DocReviewRow('สำเนาสมุดบัญชีธนาคาร.JPEG'),
-                      ],
+                      children: formData.uploadedDocuments
+                          .map((f) => _DocReviewRow(f))
+                          .toList(),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -101,12 +140,20 @@ class ScholarshipFormStep5 extends StatelessWidget {
             ),
           ),
           FormBottomButtons(
-            nextLabel: 'ยืนยัน',
-            onNext: () => Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (_) => const ScholarshipFormSuccess()),
-              (route) => route.isFirst,
-            ),
+            nextLabel: 'ยืนยันการสมัคร',
+            onNext: () {
+              final record = _buildRecord().copyWith(
+                status: ApplicationStatus.reviewing,
+              );
+              ApplicationRepository.instance.submit(record);
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ScholarshipFormSuccess(record: record),
+                ),
+                (route) => route.isFirst,
+              );
+            },
           ),
           const AppBottomNavBar(activeIndex: 1),
         ],
@@ -115,6 +162,82 @@ class ScholarshipFormStep5 extends StatelessWidget {
   }
 }
 
+// ─────────────────────────────────────────────
+//  DATA CARRIER — รวบรวมข้อมูลทุก step
+// ─────────────────────────────────────────────
+class ScholarshipFormData {
+  // Scholarship info
+  final String scholarshipId;
+  final String scholarshipName;
+  final int amount;
+
+  // Step 1
+  final String studentId;
+  final String fullName;
+  final String phone;
+  final String email;
+  final String address;
+
+  // Step 2
+  final String fatherName;
+  final String fatherPhone;
+  final String fatherJob;
+  final String fatherIncome;
+  final String motherName;
+  final String motherPhone;
+  final String motherJob;
+  final String motherIncome;
+  final String familyStatus;
+  final String siblingCount;
+  final String applicantOrder;
+  final String applicantIncome;
+  final String totalFamilyIncome;
+  final String familyNote;
+
+  // Step 3
+  final String guardianName;
+  final String guardianRelation;
+  final String guardianPhone;
+  final String guardianJob;
+  final String guardianIncome;
+
+  // Step 4
+  final List<String> uploadedDocuments;
+
+  const ScholarshipFormData({
+    required this.scholarshipId,
+    required this.scholarshipName,
+    required this.amount,
+    required this.studentId,
+    required this.fullName,
+    required this.phone,
+    required this.email,
+    required this.address,
+    required this.fatherName,
+    required this.fatherPhone,
+    required this.fatherJob,
+    required this.fatherIncome,
+    required this.motherName,
+    required this.motherPhone,
+    required this.motherJob,
+    required this.motherIncome,
+    required this.familyStatus,
+    required this.siblingCount,
+    required this.applicantOrder,
+    required this.applicantIncome,
+    required this.totalFamilyIncome,
+    required this.familyNote,
+    required this.guardianName,
+    required this.guardianRelation,
+    required this.guardianPhone,
+    required this.guardianJob,
+    required this.guardianIncome,
+    required this.uploadedDocuments,
+  });
+}
+
+// ─────────────────────────────────────────────
+//  LOCAL WIDGETS
 // ─────────────────────────────────────────────
 class _ReviewCard extends StatelessWidget {
   final IconData icon;
@@ -146,14 +269,12 @@ class _ReviewCard extends StatelessWidget {
         children: [
           Row(
             children: [
-Container(
+              Container(
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
                   color: iconBg,
-                  borderRadius: BorderRadius.circular(
-                    8,
-                  ), 
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(icon, color: AppColors.primary, size: 18),
               ),
@@ -163,7 +284,7 @@ Container(
           ),
           const SizedBox(height: 12),
           if (customChild != null) customChild!,
-          ...rows.map((r) => r),
+          ...rows,
         ],
       ),
     );
@@ -173,7 +294,6 @@ Container(
 class _ReviewRow extends StatelessWidget {
   final String label;
   final String value;
-
   const _ReviewRow(this.label, this.value);
 
   @override

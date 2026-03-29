@@ -3,36 +3,52 @@ import '../core/colors.dart';
 import '../core/text_styles.dart';
 import '../core/models.dart';
 
-void showApproveSheet(BuildContext context, Applicant applicant) {
+
+void showApproveSheet(
+  BuildContext context,
+  Applicant applicant, {
+  VoidCallback? onConfirm,
+}) {
   showModalBottomSheet(
     context: context,
     backgroundColor: Colors.transparent,
     isScrollControlled: true,
-    builder: (_) => ConfirmSheet(applicant: applicant, isApprove: true),
+    builder: (_) => ConfirmSheet(applicant: applicant, isApprove: true, onConfirm: onConfirm),
   );
 }
 
-void showRejectSheet(BuildContext context, Applicant applicant) {
+void showRejectSheet(
+  BuildContext context,
+  Applicant applicant, {
+  VoidCallback? onConfirm,
+}) {
   showModalBottomSheet(
     context: context,
     backgroundColor: Colors.transparent,
     isScrollControlled: true,
-    builder: (_) => ConfirmSheet(applicant: applicant, isApprove: false),
+    builder: (_) => ConfirmSheet(applicant: applicant, isApprove: false, onConfirm: onConfirm),
   );
 }
 
 class ConfirmSheet extends StatelessWidget {
   final Applicant applicant;
   final bool isApprove;
+  /// callback ที่จะ trigger หลัง confirm — ใช้อัพเดท repository
+  final VoidCallback? onConfirm;
 
-  const ConfirmSheet({super.key, required this.applicant, required this.isApprove});
+  const ConfirmSheet({
+    super.key,
+    required this.applicant,
+    required this.isApprove,
+    this.onConfirm,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final color = isApprove ? SXColor.success : SXColor.error;
-    final bgColor = isApprove ? SXColor.successBg : SXColor.errorBg;
-    final icon = isApprove ? Icons.check_rounded : Icons.close_rounded;
-    final title = isApprove ? 'ยืนยันการอนุมัติ' : 'ยืนยันการปฏิเสธ';
+    final color    = isApprove ? SXColor.success : SXColor.error;
+    final bgColor  = isApprove ? SXColor.successBg : SXColor.errorBg;
+    final icon     = isApprove ? Icons.check_rounded : Icons.close_rounded;
+    final title    = isApprove ? 'ยืนยันการอนุมัติ' : 'ยืนยันการปฏิเสธ';
     final subtitle = isApprove
         ? 'คุณแน่ใจหรือไม่ว่าต้องการอนุมัติใบสมัครนี้?\nการดำเนินการนี้ไม่สามารถแก้ไขได้'
         : 'คุณแน่ใจหรือไม่ว่าต้องการปฏิเสธใบสมัครนี้?\nการดำเนินการนี้ไม่สามารถแก้ไขได้';
@@ -47,46 +63,28 @@ class ConfirmSheet extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Handle
-          Container(
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(color: SXColor.border, borderRadius: BorderRadius.circular(999)),
-          ),
+          Container(width: 40, height: 4, decoration: BoxDecoration(color: SXColor.border, borderRadius: BorderRadius.circular(999))),
           const SizedBox(height: 24),
-          // Icon
           Container(
-            width: 56,
-            height: 56,
+            width: 56, height: 56,
             decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(16)),
             child: Icon(icon, color: color, size: 28),
           ),
           const SizedBox(height: 16),
           Text(title, style: SXText.sectionHeader.copyWith(fontSize: 18)),
           const SizedBox(height: 8),
-          Text(
-            subtitle,
-            textAlign: TextAlign.center,
-            style: SXText.body.copyWith(color: SXColor.textSecondary, height: 1.5),
-          ),
+          Text(subtitle, textAlign: TextAlign.center, style: SXText.body.copyWith(color: SXColor.textSecondary, height: 1.5)),
           const SizedBox(height: 20),
           // Applicant card
           Container(
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: SXColor.background,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: SXColor.border),
-            ),
+            decoration: BoxDecoration(color: SXColor.background, borderRadius: BorderRadius.circular(12), border: Border.all(color: SXColor.border)),
             child: Row(
               children: [
                 CircleAvatar(
                   radius: 20,
                   backgroundColor: SXColor.primary,
-                  child: Text(
-                    applicant.name[0],
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
-                  ),
+                  child: Text(applicant.name[0], style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -94,11 +92,7 @@ class ConfirmSheet extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(applicant.name, style: SXText.label),
-                      Text(
-                        '${applicant.id}  ·  ${applicant.scholarship}',
-                        style: SXText.caption,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      Text('${applicant.id}  ·  ${applicant.scholarship}', style: SXText.caption, overflow: TextOverflow.ellipsis),
                     ],
                   ),
                 ),
@@ -116,10 +110,7 @@ class ConfirmSheet extends StatelessWidget {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
-                  child: const Text(
-                    'ยกเลิก',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: SXColor.textSecondary),
-                  ),
+                  child: const Text('ยกเลิก', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: SXColor.textSecondary)),
                 ),
               ),
               const SizedBox(width: 12),
@@ -127,8 +118,10 @@ class ConfirmSheet extends StatelessWidget {
                 flex: 2,
                 child: ElevatedButton.icon(
                   onPressed: () {
-                    Navigator.pop(context);
-                    Navigator.pop(context);
+                    Navigator.pop(context); // ปิด sheet
+                    // อัพเดท status ผ่าน callback (จะ trigger repository.updateStatus)
+                    onConfirm?.call();
+                    // แจ้งผล
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(isApprove ? 'อนุมัติใบสมัครสำเร็จ' : 'ปฏิเสธใบสมัครสำเร็จ'),

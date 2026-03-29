@@ -2,29 +2,14 @@ import 'package:flutter/material.dart';
 import '/coreApp/themeApp/app_colors.dart';
 import '/coreApp/themeApp/app_text_style.dart';
 import '/coreApp/widgets/scholarship_form_widget.dart';
+import '/shared/application_repository.dart';
 import '/student/screens/tracking/tracking_screen.dart';
 
+/// หน้าสำเร็จ — รับ [record] ที่ถูก submit มาจาก Step 5
 class ScholarshipFormSuccess extends StatelessWidget {
-  const ScholarshipFormSuccess({super.key});
+  final ApplicationRecord record;
 
-  static const _newItem = TrackingItem(
-    id: 'AP011001',
-    title: 'ทุนด้านเทคโนโลยีดิจิทัล',
-    appliedDate: '12 ม.ค. 2569',
-    updatedDate: '20 ม.ค. 2569',
-    amount: 10000,
-    status: TrackingStatus.reviewing,
-  );
-
-  // Pop ทุก route จนถึง root แล้วส่ง result กลับให้ StudentHomeScreen
-  // เพื่อ switch ไป tab index 2 (Tracking)
-  void _goHome(BuildContext context, {bool openTracking = false}) {
-    Navigator.of(context).popUntil((route) => route.isFirst);
-    if (openTracking) {
-      // ส่ง result กลับให้ StudentHomeScreen ผ่าน Navigator result
-      Navigator.of(context).pop(2); // 2 = tracking tab index
-    }
-  }
+  const ScholarshipFormSuccess({super.key, required this.record});
 
   @override
   Widget build(BuildContext context) {
@@ -74,8 +59,8 @@ class ScholarshipFormSuccess extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
 
-                    // Application details card
-                  Container(
+                    // ── Application details card ──
+                    Container(
                       width: double.infinity,
                       decoration: BoxDecoration(
                         color: Colors.white,
@@ -85,16 +70,17 @@ class ScholarshipFormSuccess extends StatelessWidget {
                       child: Column(
                         children: [
                           Row(
-                            mainAxisAlignment:
-                                MainAxisAlignment.center, // ← จัดกลาง
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
                                 'หมายเลขการสมัคร:',
-                                style: AppTextStyle.caption.copyWith(fontSize: 14),
+                                style: AppTextStyle.caption.copyWith(
+                                  fontSize: 14,
+                                ),
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                'AP011001',
+                                record.id,
                                 style: AppTextStyle.heading2.copyWith(
                                   fontSize: 19,
                                   color: Colors.black,
@@ -103,23 +89,26 @@ class ScholarshipFormSuccess extends StatelessWidget {
                               ),
                             ],
                           ),
-                          const Divider(
-                            height: 24,
-                            color: AppColors.border,
-                          ), // ← สีอ่อน
-                          _InfoRow('ทุนที่สมัคร', 'ทุนด้านเทคโนโลยีดิจิทัล'),
+                          const Divider(height: 24, color: AppColors.border),
+                          _InfoRow('ทุนที่สมัคร', record.scholarshipName),
                           const SizedBox(height: 10),
-                          _InfoRow('จำนวนเงิน', '10,000'),
+                          _InfoRow(
+                            'จำนวนเงิน',
+                            '${_formatAmount(record.amount)} บาท',
+                          ),
                           const SizedBox(height: 10),
-                          _InfoRow('วันที่สมัคร', '12 ม.ค. 2569'),
+                          _InfoRow('วันที่สมัคร', record.formattedAppliedDate),
                           const SizedBox(height: 10),
-                          _InfoRow('เวลาที่สมัคร', '14:00'),
+                          _InfoRow(
+                            'เวลาที่สมัคร',
+                            '${record.appliedAt.hour.toString().padLeft(2, '0')}:${record.appliedAt.minute.toString().padLeft(2, '0')}',
+                          ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 16),
 
-                    // Notice banner
+                    // ── Notice banner ──
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(14),
@@ -152,7 +141,7 @@ class ScholarshipFormSuccess extends StatelessWidget {
                     ),
                     const SizedBox(height: 28),
 
-                    // ── ติดตามทุน → TrackingScreen (push on top) ──
+                    // ── ติดตามทุน ──
                     SizedBox(
                       width: double.infinity,
                       height: 50,
@@ -161,8 +150,7 @@ class ScholarshipFormSuccess extends StatelessWidget {
                           Navigator.pushAndRemoveUntil(
                             context,
                             MaterialPageRoute(
-                              builder: (_) =>
-                                  const TrackingScreen(highlightItem: _newItem),
+                              builder: (_) => const TrackingScreen(),
                             ),
                             (route) => route.isFirst,
                           );
@@ -185,14 +173,12 @@ class ScholarshipFormSuccess extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
 
-                    // ── กลับหน้าหลัก → StudentHomeScreen tab 2 (Tracking) ──
+                    // ── กลับหน้าหลัก ──
                     SizedBox(
                       width: double.infinity,
                       height: 50,
                       child: OutlinedButton.icon(
                         onPressed: () {
-                          // Pop ทุก route กลับถึง StudentHomeScreen
-                          // แล้วส่ง tabIndex=2 เป็น result เพื่อ switch tab
                           Navigator.of(context).popUntil((r) => r.isFirst);
                         },
                         icon: const Icon(Icons.home_outlined, size: 18),
@@ -219,6 +205,13 @@ class ScholarshipFormSuccess extends StatelessWidget {
           const AppBottomNavBar(activeIndex: 1),
         ],
       ),
+    );
+  }
+
+  String _formatAmount(int amount) {
+    return amount.toString().replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (m) => '${m[1]},',
     );
   }
 }

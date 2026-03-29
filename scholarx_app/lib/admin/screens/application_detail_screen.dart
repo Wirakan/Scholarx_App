@@ -3,11 +3,18 @@ import '../core/colors.dart';
 import '../core/text_styles.dart';
 import '../core/models.dart';
 import 'confirm_sheet.dart';
+import '/shared/application_repository.dart';
 import '/screens/splash_screen.dart';
 
 class ApplicationDetailScreen extends StatefulWidget {
   final Applicant applicant;
-  const ApplicationDetailScreen({super.key, required this.applicant});
+  final String? applicationId;
+
+  const ApplicationDetailScreen({
+    super.key,
+    required this.applicant,
+    this.applicationId,
+  });
 
   @override
   State<ApplicationDetailScreen> createState() =>
@@ -17,20 +24,47 @@ class ApplicationDetailScreen extends StatefulWidget {
 class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
   late String _currentStatus;
 
-  final List<String> _statusOptions = ['รอพิจารณา', 'กำลังพิจารณา'];
-
   @override
   void initState() {
     super.initState();
-    _currentStatus = 'รอพิจารณา';
+    if (widget.applicationId != null) {
+      final record =
+          ApplicationRepository.instance.findById(widget.applicationId!);
+      _currentStatus = record?.status.label ?? widget.applicant.status;
+    } else {
+      _currentStatus = widget.applicant.status;
+    }
+    // ฟัง repo เพื่อ sync status เมื่อมีการเปลี่ยนแปลงจากภายนอก
+    ApplicationRepository.instance.addListener(_onRepoChanged);
+  }
+
+  @override
+  void dispose() {
+    ApplicationRepository.instance.removeListener(_onRepoChanged);
+    super.dispose();
+  }
+
+  void _onRepoChanged() {
+    if (!mounted || widget.applicationId == null) return;
+    final record =
+        ApplicationRepository.instance.findById(widget.applicationId!);
+    if (record == null) return;
+    final newLabel = record.status.label;
+    if (newLabel != _currentStatus) {
+      setState(() => _currentStatus = newLabel);
+    }
   }
 
   Color get _statusColor {
     switch (_currentStatus) {
-      case 'รอพิจารณา':
+      case 'รอดำเนินการ':
         return SXColor.warning;
       case 'กำลังพิจารณา':
         return const Color(0xFF60A5FA);
+      case 'อนุมัติ':
+        return SXColor.success;
+      case 'ปฏิเสธ':
+        return SXColor.error;
       default:
         return SXColor.textSecondary;
     }
@@ -38,12 +72,44 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
 
   Color get _statusBg {
     switch (_currentStatus) {
-      case 'รอพิจารณา':
+      case 'รอดำเนินการ':
         return SXColor.warningBg;
       case 'กำลังพิจารณา':
         return const Color(0xFFEFF6FF);
+      case 'อนุมัติ':
+        return SXColor.successBg;
+      case 'ปฏิเสธ':
+        return SXColor.errorBg;
       default:
         return SXColor.neutralBg;
+    }
+  }
+
+  void _applyStatus(String newLabel) {
+    setState(() => _currentStatus = newLabel);
+    if (widget.applicationId != null) {
+      final newStatus = _fromLabel(newLabel);
+      if (newStatus != null) {
+        ApplicationRepository.instance.updateStatus(
+          widget.applicationId!,
+          newStatus,
+        );
+      }
+    }
+  }
+
+  ApplicationStatus? _fromLabel(String label) {
+    switch (label) {
+      case 'รอดำเนินการ':
+        return ApplicationStatus.pending;
+      case 'กำลังพิจารณา':
+        return ApplicationStatus.reviewing;
+      case 'อนุมัติ':
+        return ApplicationStatus.approved;
+      case 'ปฏิเสธ':
+        return ApplicationStatus.rejected;
+      default:
+        return null;
     }
   }
 
@@ -102,55 +168,60 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
   }
 
   void _showStatusPicker(BuildContext context) {
+    final allOptions = ['รอดำเนินการ', 'กำลังพิจารณา', 'อนุมัติ', 'ปฏิเสธ'];
+    // snapshot ค่า _currentStatus ก่อน เพื่อใช้ใน StatefulBuilder
+    final currentSnapshot = _currentStatus;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (_) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: SXColor.border,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text('เปลี่ยนสถานะ', style: SXText.sectionHeader),
-            const SizedBox(height: 12),
-            ..._statusOptions.map(
-              (s) => ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(
-                  s,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: s == _currentStatus
-                        ? SXColor.primary
-                        : SXColor.textPrimary,
+      builder: (_) => StatefulBuilder(
+        builder: (ctx, setSheetState) => Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: SXColor.border,
+                    borderRadius: BorderRadius.circular(999),
                   ),
                 ),
-                trailing: s == _currentStatus
-                    ? Icon(Icons.check, color: SXColor.primary, size: 18)
-                    : null,
-                onTap: () {
-                  setState(() => _currentStatus = s);
-                  Navigator.pop(context);
-                },
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              const Text('เปลี่ยนสถานะ', style: SXText.sectionHeader),
+              const SizedBox(height: 12),
+              ...allOptions.map(
+                (s) => ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(
+                    s,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: s == currentSnapshot
+                          ? SXColor.primary
+                          : SXColor.textPrimary,
+                    ),
+                  ),
+                  trailing: s == currentSnapshot
+                      ? Icon(Icons.check, color: SXColor.primary, size: 18)
+                      : null,
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    _applyStatus(s);
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -158,7 +229,14 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // อ่าน record ตรงจาก repo — ไม่ใช้ ListenableBuilder เพื่อหลีกเลี่ยง
+    // mouse_tracker assertion error ที่เกิดเมื่อ widget tree rebuild ระหว่าง gesture
+    final record = widget.applicationId != null
+        ? ApplicationRepository.instance.findById(widget.applicationId!)
+        : null;
+
     final a = widget.applicant;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: SXColor.primary,
@@ -188,7 +266,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ─── ข้อมูลผู้สมัคร ───────────────────────────────────────────
+            // ─── ข้อมูลผู้สมัคร ──────────────────────────────
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -205,11 +283,13 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header row: title + status dropdown
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('ข้อมูลผู้สมัคร', style: SXText.sectionHeader),
+                      const Text(
+                        'ข้อมูลผู้สมัคร',
+                        style: SXText.sectionHeader,
+                      ),
                       GestureDetector(
                         onTap: () => _showStatusPicker(context),
                         child: Container(
@@ -222,6 +302,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                             borderRadius: BorderRadius.circular(999),
                           ),
                           child: Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
                                 _currentStatus,
@@ -244,15 +325,13 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-
-                  // Avatar + name
                   Row(
                     children: [
                       CircleAvatar(
                         radius: 36,
                         backgroundColor: SXColor.primaryBg,
                         child: Text(
-                          a.name[0],
+                          a.name.isNotEmpty ? a.name[0] : '?',
                           style: const TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.w700,
@@ -261,40 +340,46 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                         ),
                       ),
                       const SizedBox(width: 14),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            a.name,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: SXColor.textPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(a.studentId, style: SXText.caption),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.email_outlined,
-                                size: 13,
-                                color: SXColor.textSecondary,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              a.name,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: SXColor.textPrimary,
                               ),
-                              const SizedBox(width: 4),
-                              Text(a.email, style: SXText.caption),
-                            ],
-                          ),
-                        ],
+                            ),
+                            const SizedBox(height: 2),
+                            Text(a.studentId, style: SXText.caption),
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.email_outlined,
+                                  size: 13,
+                                  color: SXColor.textSecondary,
+                                ),
+                                const SizedBox(width: 4),
+                                Expanded(
+                                  child: Text(
+                                    a.email,
+                                    style: SXText.caption,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 16),
                   const Divider(color: SXColor.border, height: 1),
                   const SizedBox(height: 16),
-
-                  // Info grid
                   Row(
                     children: [
                       _InfoCol(label: 'คณะ', value: a.faculty),
@@ -305,7 +390,10 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                   Row(
                     children: [
                       _InfoCol(label: 'ชั้นปี', value: a.year),
-                      _InfoCol(label: 'เกรดเฉลี่ย', value: a.gpa.toString()),
+                      _InfoCol(
+                        label: 'เกรดเฉลี่ย',
+                        value: a.gpa.toStringAsFixed(2),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -317,7 +405,105 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
             ),
             const SizedBox(height: 12),
 
-            // ─── รายละเอียดการสมัคร ───────────────────────────────────────
+            // ─── รายละเอียดครอบครัว ──
+            if (record != null) ...[
+              _SectionCard(
+                title: 'ข้อมูลครอบครัว',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        _InfoCol(label: 'ชื่อบิดา', value: record.fatherName),
+                        _InfoCol(label: 'อาชีพบิดา', value: record.fatherJob),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        _InfoCol(
+                          label: 'รายได้บิดา',
+                          value: record.fatherIncome,
+                        ),
+                        _InfoCol(
+                          label: 'เบอร์บิดา',
+                          value: record.fatherPhone,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        _InfoCol(label: 'ชื่อมารดา', value: record.motherName),
+                        _InfoCol(
+                          label: 'อาชีพมารดา',
+                          value: record.motherJob,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        _InfoCol(
+                          label: 'รายได้มารดา',
+                          value: record.motherIncome,
+                        ),
+                        _InfoCol(
+                          label: 'เบอร์มารดา',
+                          value: record.motherPhone,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    _InfoCol(
+                      label: 'สภาพครอบครัว',
+                      value: record.familyStatus,
+                    ),
+                    const SizedBox(height: 4),
+                    _InfoCol(
+                      label: 'รายได้รวม/ปี',
+                      value: record.totalFamilyIncome,
+                    ),
+                    if (record.familyNote.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Text('ข้อมูลเพิ่มเติม', style: SXText.caption),
+                      const SizedBox(height: 4),
+                      Text(record.familyNote, style: SXText.body),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              _SectionCard(
+                title: 'ข้อมูลผู้อุปการะ',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        _InfoCol(label: 'ชื่อ', value: record.guardianName),
+                        _InfoCol(
+                          label: 'ความสัมพันธ์',
+                          value: record.guardianRelation,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        _InfoCol(label: 'อาชีพ', value: record.guardianJob),
+                        _InfoCol(label: 'รายได้', value: record.guardianIncome),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    _InfoCol(label: 'เบอร์โทร', value: record.guardianPhone),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+
+            // ─── รายละเอียดการสมัคร ──────────────────────────
             _SectionCard(
               title: 'รายละเอียดการสมัคร',
               child: Column(
@@ -349,16 +535,20 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
             ),
             const SizedBox(height: 12),
 
-            // ─── เอกสาร ───────────────────────────────────────────────────
+            // ─── เอกสาร ──────────────────────────────────────
             _SectionCard(
               title: 'เอกสารที่อัปโหลดแล้ว',
               child: Column(
-                children: const [
-                  _DocRow('สำเนาบัตรประชาชน.pdf'),
-                  _DocRow('รูปถ่ายหน้าตรง.JPEG'),
-                  _DocRow('ใบแสดงผลการเรียน.pdf'),
-                  _DocRow('สำเนาสมุดบัญชีธนาคาร.JPEG'),
-                ],
+                children: (record?.uploadedDocuments.isNotEmpty == true
+                        ? record!.uploadedDocuments
+                        : const [
+                            'สำเนาบัตรประชาชน.pdf',
+                            'รูปถ่ายหน้าตรง.JPEG',
+                            'ใบแสดงผลการเรียน.pdf',
+                            'สำเนาสมุดบัญชีธนาคาร.JPEG',
+                          ])
+                    .map((f) => _DocRow(f))
+                    .toList(),
               ),
             ),
             const SizedBox(height: 80),
@@ -381,7 +571,11 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
           children: [
             Expanded(
               child: ElevatedButton.icon(
-                onPressed: () => showRejectSheet(context, a),
+                onPressed: () => showRejectSheet(
+                  context,
+                  a,
+                  onConfirm: () => _applyStatus('ปฏิเสธ'),
+                ),
                 icon: const Icon(Icons.close, size: 16),
                 label: const Text('ปฏิเสธ'),
                 style: ElevatedButton.styleFrom(
@@ -403,7 +597,11 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
             Expanded(
               flex: 2,
               child: ElevatedButton.icon(
-                onPressed: () => showApproveSheet(context, a),
+                onPressed: () => showApproveSheet(
+                  context,
+                  a,
+                  onConfirm: () => _applyStatus('อนุมัติ'),
+                ),
                 icon: const Icon(Icons.check, size: 16),
                 label: const Text('อนุมัติ'),
                 style: ElevatedButton.styleFrom(
@@ -428,7 +626,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
   }
 }
 
-// ─── Local Widgets ─────────────────────────────────────────────────────────────
+// ─── Local Widgets ─────────────────────────────────────────
 class _InfoCol extends StatelessWidget {
   final String label;
   final String value;
@@ -442,7 +640,7 @@ class _InfoCol extends StatelessWidget {
         children: [
           Text(label, style: SXText.caption),
           const SizedBox(height: 2),
-          Text(value, style: SXText.label),
+          Text(value.isNotEmpty ? value : '-', style: SXText.label),
         ],
       ),
     );
@@ -505,7 +703,11 @@ class _DocRow extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Expanded(child: Text(name, style: SXText.body)),
-          const Icon(Icons.download_outlined, size: 18, color: SXColor.primary),
+          const Icon(
+            Icons.download_outlined,
+            size: 18,
+            color: SXColor.primary,
+          ),
         ],
       ),
     );

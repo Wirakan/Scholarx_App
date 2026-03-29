@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import '../core/colors.dart';
 import '../core/models.dart';
-import '../widgets/sx_app_bar.dart';
 import '../widgets/applicant_card.dart';
 import 'application_detail_screen.dart';
 import '../widgets/admin_bottom_nav.dart';
+import '/shared/application_repository.dart';
 import '/screens/splash_screen.dart';
+import 'submitted_application_detail_screen.dart';
 
-// ─── Filter Sheet ─────────────────────────────────────────────────────────────
+// ─── Filter Sheet ──────────────────────────────────────────────────────
 void showFilterSheet(
   BuildContext context, {
   required String selectedStatus,
@@ -30,7 +31,6 @@ class _FilterSheet extends StatefulWidget {
   final String selectedStatus;
   final String selectedCategory;
   final Function(String status, String category) onApply;
-
   const _FilterSheet({
     required this.selectedStatus,
     required this.selectedCategory,
@@ -103,7 +103,6 @@ class _FilterSheetState extends State<_FilterSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Handle
           Center(
             child: Container(
               width: 40,
@@ -124,8 +123,6 @@ class _FilterSheetState extends State<_FilterSheet> {
             ),
           ),
           const SizedBox(height: 16),
-
-          // สถานะใบสมัคร
           const Text(
             'สถานะใบสมัคร',
             style: TextStyle(
@@ -144,8 +141,6 @@ class _FilterSheetState extends State<_FilterSheet> {
                 .toList(),
           ),
           const SizedBox(height: 8),
-
-          // ประเภททุน
           const Text(
             'ประเภททุน',
             style: TextStyle(
@@ -167,18 +162,14 @@ class _FilterSheetState extends State<_FilterSheet> {
                 .toList(),
           ),
           const SizedBox(height: 24),
-
-          // Buttons
           Row(
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () {
-                    setState(() {
-                      _status = 'ทั้งหมด';
-                      _category = 'ทั้งหมด';
-                    });
-                  },
+                  onPressed: () => setState(() {
+                    _status = 'ทั้งหมด';
+                    _category = 'ทั้งหมด';
+                  }),
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: SXColor.border),
                     shape: RoundedRectangleBorder(
@@ -228,7 +219,7 @@ class _FilterSheetState extends State<_FilterSheet> {
   }
 }
 
-// ─── Application List Screen ──────────────────────────────────────────────────
+// ─── Application List Screen ──────────────────────────────────────────
 class ApplicationListScreen extends StatefulWidget {
   const ApplicationListScreen({super.key});
 
@@ -237,17 +228,56 @@ class ApplicationListScreen extends StatefulWidget {
 }
 
 class _ApplicationListScreenState extends State<ApplicationListScreen> {
-  String activeTab = 'ทั้งหมด';
-  String activeCategory = 'ทั้งหมด';
+  String _activeTab = 'ทั้งหมด';
+  String _activeCategory = 'ทั้งหมด';
+  String _searchQuery = '';
   final tabs = ['ทั้งหมด', 'รอดำเนินการ', 'กำลังพิจารณา', 'อนุมัติ', 'ปฏิเสธ'];
 
   bool get hasActiveFilter =>
-      activeTab != 'ทั้งหมด' || activeCategory != 'ทั้งหมด';
+      _activeTab != 'ทั้งหมด' || _activeCategory != 'ทั้งหมด';
 
-  List<Applicant> get filtered {
+  /// แปลง ApplicationRecord → Applicant เพื่อใช้กับ ApplicantCard เดิม
+  Applicant _toApplicant(ApplicationRecord r) {
+    return Applicant(
+      id: r.id,
+      name: r.fullName,
+      studentId: r.studentId,
+      scholarship: r.scholarshipName,
+      faculty: r.faculty,
+      major: r.major,
+      year: r.year,
+      gpa: r.gpa,
+      address: r.address,
+      email: r.email,
+      date: r.formattedAppliedDate,
+      status: r.status.label,
+      reason: r.reason,
+    );
+  }
+
+  List<ApplicationRecord> _getFilteredRepo(List<ApplicationRecord> all) {
+    return all.where((r) {
+      final statusMatch =
+          _activeTab == 'ทั้งหมด' || r.status.label == _activeTab;
+      final searchMatch =
+          _searchQuery.isEmpty ||
+          r.fullName.contains(_searchQuery) ||
+          r.studentId.contains(_searchQuery) ||
+          r.scholarshipName.contains(_searchQuery) ||
+          r.id.contains(_searchQuery);
+      return statusMatch && searchMatch;
+    }).toList();
+  }
+
+  List<Applicant> _getFilteredMock() {
     return mockApplicants.where((a) {
-      final statusMatch = activeTab == 'ทั้งหมด' || a.status == activeTab;
-      return statusMatch;
+      final statusMatch = _activeTab == 'ทั้งหมด' || a.status == _activeTab;
+      final searchMatch =
+          _searchQuery.isEmpty ||
+          a.name.contains(_searchQuery) ||
+          a.studentId.contains(_searchQuery) ||
+          a.scholarship.contains(_searchQuery);
+      return statusMatch && searchMatch;
     }).toList();
   }
 
@@ -285,7 +315,7 @@ class _ApplicationListScreenState extends State<ApplicationListScreen> {
                 ),
               ),
               onTap: () {
-                Navigator.pop(context); // ปิด bottom sheet ก่อน
+                Navigator.pop(context);
                 Navigator.pushAndRemoveUntil(
                   context,
                   PageRouteBuilder(
@@ -294,7 +324,7 @@ class _ApplicationListScreenState extends State<ApplicationListScreen> {
                         FadeTransition(opacity: anim, child: child),
                     transitionDuration: const Duration(milliseconds: 600),
                   ),
-                  (route) => false, // ล้าง stack ทั้งหมด
+                  (route) => false,
                 );
               },
             ),
@@ -305,165 +335,216 @@ class _ApplicationListScreenState extends State<ApplicationListScreen> {
     );
   }
 
+  /// Navigate ไป detail พร้อม applicationId ที่ถูกต้อง
+void _openDetail(BuildContext context, Applicant a, String? applicationId) {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) {
+        if (applicationId != null) {
+          return SubmittedApplicationDetailScreen(
+            applicationId: applicationId,
+          );
+        }
+
+        return ApplicationDetailScreen(
+          applicant: a,
+          applicationId: applicationId,
+        );
+      },
+    ),
+  );
+}
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: SXColor.primary,
-        elevation: 0,
-        title: const Text(
-          'การจัดการใบสมัคร',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w700,
-            fontSize: 18,
-          ),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.menu_rounded, color: Colors.white),
-            onPressed: () => _showMenu(context),
-          ),
-        ],
-      ),
-      backgroundColor: SXColor.background,
-      bottomNavigationBar: const AdminBottomNav(currentIndex: 1),
-      body: Column(
-        children: [
-          // Search bar
-          Container(
-            color: SXColor.surface,
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: SXColor.background,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: SXColor.border),
-                    ),
-                    child: const TextField(
-                      decoration: InputDecoration(
-                        hintText: 'ค้นหาใบสมัคร',
-                        hintStyle: TextStyle(
-                          fontSize: 13,
-                          color: SXColor.textSecondary,
-                        ),
-                        prefixIcon: Icon(
-                          Icons.search,
-                          size: 18,
-                          color: SXColor.textSecondary,
-                        ),
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(vertical: 10),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                // Filter button — highlight ถ้ามี filter active
-                GestureDetector(
-                  onTap: () => showFilterSheet(
-                    context,
-                    selectedStatus: activeTab,
-                    selectedCategory: activeCategory,
-                    onApply: (status, category) {
-                      setState(() {
-                        activeTab = status;
-                        activeCategory = category;
-                      });
-                    },
-                  ),
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: hasActiveFilter
-                          ? SXColor.primary
-                          : SXColor.primaryBg,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: hasActiveFilter
-                            ? SXColor.primary
-                            : SXColor.primaryPale,
-                      ),
-                    ),
-                    child: Icon(
-                      Icons.filter_list,
-                      color: hasActiveFilter ? Colors.white : SXColor.primary,
-                      size: 20,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Filter tabs
-          Container(
-            width: double.infinity,
-            color: SXColor.surface,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              child: Row(
-                children: tabs.map((tab) {
-                  final active = tab == activeTab;
-                  return GestureDetector(
-                    onTap: () => setState(() => activeTab = tab),
-                    child: Container(
-                      margin: const EdgeInsets.only(right: 8),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 7,
-                      ),
-                      decoration: BoxDecoration(
-                        color: active ? SXColor.primary : SXColor.surface,
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(
-                          color: active ? SXColor.primary : SXColor.border,
-                        ),
-                      ),
-                      child: Text(
-                        tab,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: active ? Colors.white : SXColor.textSecondary,
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
+    return ListenableBuilder(
+      listenable: ApplicationRepository.instance,
+      builder: (context, _) {
+        final repoRecords = ApplicationRepository.instance.all;
+
+        // แยก filtered list ของ repo และ mock
+        final filteredRepoRecords = _getFilteredRepo(repoRecords);
+        final filteredRepoApplicants = filteredRepoRecords
+            .map(_toApplicant)
+            .toList();
+        final filteredMockApplicants = _getFilteredMock();
+
+        // รวมกัน: repo records ก่อน ตามด้วย mock
+        final filteredApplicants = [
+          ...filteredRepoApplicants,
+          ...filteredMockApplicants,
+        ];
+
+        return Scaffold(
+          appBar: AppBar(
+            backgroundColor: SXColor.primary,
+            elevation: 0,
+            title: const Text(
+              'การจัดการใบสมัคร',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: 18,
               ),
             ),
-          ),
-          // List
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: filtered.length,
-              itemBuilder: (context, i) {
-                final a = filtered[i];
-                return ApplicantCard(
-                  applicant: a,
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ApplicationDetailScreen(applicant: a),
-                    ),
-                  ),
-                );
-              },
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => Navigator.pop(context),
             ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.menu_rounded, color: Colors.white),
+                onPressed: () => _showMenu(context),
+              ),
+            ],
           ),
-        ],
-      ),
+          backgroundColor: SXColor.background,
+          bottomNavigationBar: const AdminBottomNav(currentIndex: 1),
+          body: Column(
+            children: [
+              // ── Search ──
+              Container(
+                color: SXColor.surface,
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: SXColor.background,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: SXColor.border),
+                        ),
+                        child: TextField(
+                          onChanged: (v) => setState(() => _searchQuery = v),
+                          decoration: const InputDecoration(
+                            hintText: 'ค้นหาใบสมัคร',
+                            hintStyle: TextStyle(
+                              fontSize: 13,
+                              color: SXColor.textSecondary,
+                            ),
+                            prefixIcon: Icon(
+                              Icons.search,
+                              size: 18,
+                              color: SXColor.textSecondary,
+                            ),
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(vertical: 10),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    GestureDetector(
+                      onTap: () => showFilterSheet(
+                        context,
+                        selectedStatus: _activeTab,
+                        selectedCategory: _activeCategory,
+                        onApply: (s, c) => setState(() {
+                          _activeTab = s;
+                          _activeCategory = c;
+                        }),
+                      ),
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: hasActiveFilter
+                              ? SXColor.primary
+                              : SXColor.primaryBg,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: hasActiveFilter
+                                ? SXColor.primary
+                                : SXColor.primaryPale,
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.filter_list,
+                          color: hasActiveFilter
+                              ? Colors.white
+                              : SXColor.primary,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // ── Tabs ──
+              Container(
+                width: double.infinity,
+                color: SXColor.surface,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  child: Row(
+                    children: tabs.map((tab) {
+                      final active = tab == _activeTab;
+                      return GestureDetector(
+                        onTap: () => setState(() => _activeTab = tab),
+                        child: Container(
+                          margin: const EdgeInsets.only(right: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 7,
+                          ),
+                          decoration: BoxDecoration(
+                            color: active ? SXColor.primary : SXColor.surface,
+                            borderRadius: BorderRadius.circular(999),
+                            border: Border.all(
+                              color: active ? SXColor.primary : SXColor.border,
+                            ),
+                          ),
+                          child: Text(
+                            tab,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: active
+                                  ? Colors.white
+                                  : SXColor.textSecondary,
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+              // ── List ──
+              Expanded(
+                child: filteredApplicants.isEmpty
+                    ? const Center(
+                        child: Text(
+                          'ไม่มีใบสมัคร',
+                          style: TextStyle(color: SXColor.textSecondary),
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: filteredApplicants.length,
+                        itemBuilder: (context, i) {
+                          final a = filteredApplicants[i];
+                          // ค้นหา record จาก repo ด้วย id ที่ตรงกัน
+                          final record = ApplicationRepository.instance
+                              .findById(a.id);
+                          return ApplicantCard(
+                            applicant: a,
+                            onTap: () => _openDetail(context, a, record?.id),
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

@@ -1,24 +1,70 @@
+// ════════════════════════════════════════════════════════════
+//  scholarship_form_step1.dart  (UPDATED)
+//  — เก็บค่าจาก controller แล้วส่งต่อไป Step 2
+// ════════════════════════════════════════════════════════════
 import 'package:flutter/material.dart';
 import '/coreApp/themeApp/app_colors.dart';
 import '/coreApp/themeApp/app_text_style.dart';
 import '/coreApp/widgets/scholarship_form_widget.dart';
+import '/student/models/student_model.dart';
 import 'scholarship_form_step2.dart';
+import 'scholarship_form_step5.dart'; // for ScholarshipFormData
 
 class ScholarshipFormStep1 extends StatefulWidget {
-  const ScholarshipFormStep1({super.key});
+  /// ข้อมูลทุนที่ผู้ใช้เลือก (ส่งมาจาก ScholarshipDetailScreen)
+  final String scholarshipId;
+  final String scholarshipName;
+  final int amount;
+
+  const ScholarshipFormStep1({
+    super.key,
+    required this.scholarshipId,
+    required this.scholarshipName,
+    required this.amount,
+  });
 
   @override
   State<ScholarshipFormStep1> createState() => _ScholarshipFormStep1State();
 }
 
 class _ScholarshipFormStep1State extends State<ScholarshipFormStep1> {
-  final _studentIdCtrl = TextEditingController(text: '663040127-7');
-  final _nameCtrl = TextEditingController(text: 'ธนวัฒน์ ประเสริฐ');
-  final _phoneCtrl = TextEditingController(text: '012-345-67xx');
-  final _emailCtrl = TextEditingController(text: 'som.s@kkumail.com');
+  final _student = StudentModel.mock;
+
+  late final _studentIdCtrl = TextEditingController(text: _student.studentId);
+  late final _nameCtrl = TextEditingController(text: _student.fullName);
+  late final _phoneCtrl = TextEditingController(text: '012-345-6789');
+  late final _emailCtrl = TextEditingController(text: _student.email);
   final _addressCtrl = TextEditingController(
     text: '123 ถ.มิตรภาพ ต.ในเมือง อ.เมือง จ.ขอนแก่น 40000',
   );
+
+  @override
+  void dispose() {
+    _studentIdCtrl.dispose();
+    _nameCtrl.dispose();
+    _phoneCtrl.dispose();
+    _emailCtrl.dispose();
+    _addressCtrl.dispose();
+    super.dispose();
+  }
+
+  void _goNext() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ScholarshipFormStep2(
+          scholarshipId: widget.scholarshipId,
+          scholarshipName: widget.scholarshipName,
+          amount: widget.amount,
+          studentId: _studentIdCtrl.text.trim(),
+          fullName: _nameCtrl.text.trim(),
+          phone: _phoneCtrl.text.trim(),
+          email: _emailCtrl.text.trim(),
+          address: _addressCtrl.text.trim(),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,14 +72,11 @@ class _ScholarshipFormStep1State extends State<ScholarshipFormStep1> {
       backgroundColor: AppColors.background,
       body: Column(
         children: [
-          // ── ORANGE HEADER ──
           const FormHeader(
             title: 'สมัครขอทุนการศึกษา',
             subtitle: 'กรุณากรอกข้อมูลการสมัคร',
           ),
-          // ── WHITE STEP BAR ──
           const StepIndicatorBar(currentStep: 1),
-          // ── SCROLLABLE CONTENT ──
           Expanded(
             child: SingleChildScrollView(
               child: Column(
@@ -42,11 +85,9 @@ class _ScholarshipFormStep1State extends State<ScholarshipFormStep1> {
                     message:
                         'กรุณาตรวจสอบความถูกต้องของข้อมูลก่อนกดถัดไป ข้อมูลที่มีเครื่องหมาย * จำเป็นต้องกรอก',
                   ),
-FormSectionCard(
+                  FormSectionCard(
                     icon: Icons.person_outline,
-                    iconBorderRadius: BorderRadius.circular(
-                      8,
-                    ), // ← เพิ่มบรรทัดนี้
+                    iconBorderRadius: BorderRadius.circular(8),
                     title: 'ข้อมูลส่วนตัว',
                     children: [
                       FormTextField(
@@ -80,9 +121,7 @@ FormSectionCard(
                   ),
                   FormSectionCard(
                     icon: Icons.home_outlined,
-                    iconBorderRadius: BorderRadius.circular(
-                      8,
-                    ), // ← เพิ่มบรรทัดนี้
+                    iconBorderRadius: BorderRadius.circular(8),
                     title: 'ที่อยู่',
                     iconBgColor: const Color(0xFFFFF0E8),
                     children: [
@@ -98,13 +137,7 @@ FormSectionCard(
               ),
             ),
           ),
-          // ── BOTTOM BUTTONS ──
-          FormBottomButtons(
-            onNext: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const ScholarshipFormStep2()),
-            ),
-          ),
+          FormBottomButtons(onNext: _goNext),
           const AppBottomNavBar(activeIndex: 1),
         ],
       ),

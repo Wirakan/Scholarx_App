@@ -1,10 +1,33 @@
+// ════════════════════════════════════════════════════════════
+//  scholarship_form_step2.dart  (UPDATED)
+// ════════════════════════════════════════════════════════════
 import 'package:flutter/material.dart';
 import '/coreApp/themeApp/app_colors.dart';
 import '/coreApp/widgets/scholarship_form_widget.dart';
 import 'scholarship_form_step3.dart';
 
 class ScholarshipFormStep2 extends StatefulWidget {
-  const ScholarshipFormStep2({super.key});
+  // ── ข้อมูลที่รับมาจาก Step 1 ──
+  final String scholarshipId;
+  final String scholarshipName;
+  final int amount;
+  final String studentId;
+  final String fullName;
+  final String phone;
+  final String email;
+  final String address;
+
+  const ScholarshipFormStep2({
+    super.key,
+    required this.scholarshipId,
+    required this.scholarshipName,
+    required this.amount,
+    required this.studentId,
+    required this.fullName,
+    required this.phone,
+    required this.email,
+    required this.address,
+  });
 
   @override
   State<ScholarshipFormStep2> createState() => _ScholarshipFormStep2State();
@@ -43,7 +66,6 @@ class _ScholarshipFormStep2State extends State<ScholarshipFormStep2> {
     'เกษตรกร',
     'อื่นๆ',
   ];
-
   final _incomeRanges = [
     '0 - 15,000',
     '15,000 - 20,000',
@@ -52,7 +74,6 @@ class _ScholarshipFormStep2State extends State<ScholarshipFormStep2> {
     '50,001 - 100,000',
     'มากกว่า 100,000',
   ];
-
   final _familyStatuses = [
     'บิดา - มารดา อยู่ด้วยกัน',
     'บิดาเสียชีวิต',
@@ -60,7 +81,6 @@ class _ScholarshipFormStep2State extends State<ScholarshipFormStep2> {
     'บิดา - มารดาแยกทางกัน',
     'อื่นๆ',
   ];
-
   final _totalIncomes = [
     '0 - 50,000',
     '50,001 - 100,000',
@@ -69,6 +89,48 @@ class _ScholarshipFormStep2State extends State<ScholarshipFormStep2> {
     '300,001 - 500,000',
     'มากกว่า 500,000',
   ];
+
+  @override
+  void dispose() {
+    _fatherNameCtrl.dispose();
+    _fatherPhoneCtrl.dispose();
+    _motherNameCtrl.dispose();
+    _motherPhoneCtrl.dispose();
+    _additionalInfoCtrl.dispose();
+    super.dispose();
+  }
+
+  void _goNext() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ScholarshipFormStep3(
+          scholarshipId: widget.scholarshipId,
+          scholarshipName: widget.scholarshipName,
+          amount: widget.amount,
+          studentId: widget.studentId,
+          fullName: widget.fullName,
+          phone: widget.phone,
+          email: widget.email,
+          address: widget.address,
+          fatherName: _fatherNameCtrl.text.trim(),
+          fatherPhone: _fatherPhoneCtrl.text.trim(),
+          fatherJob: _fatherOccupation,
+          fatherIncome: _fatherIncome,
+          motherName: _motherNameCtrl.text.trim(),
+          motherPhone: _motherPhoneCtrl.text.trim(),
+          motherJob: _motherOccupation,
+          motherIncome: _motherIncome,
+          familyStatus: _familyStatus,
+          siblingCount: _siblingCount,
+          applicantOrder: _applicantOrder,
+          applicantIncome: _applicantIncome,
+          totalFamilyIncome: _totalFamilyIncome,
+          familyNote: _additionalInfoCtrl.text.trim(),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,10 +152,9 @@ class _ScholarshipFormStep2State extends State<ScholarshipFormStep2> {
                         'กรอกข้อมูลครอบครัวให้ครบถ้วนเพื่อประกอบการพิจารณาทุน',
                   ),
                   // FATHER
-// FATHER
                   FormSectionCard(
                     icon: Icons.person_outline,
-                    iconBorderRadius: BorderRadius.circular(8), // ← เพิ่ม
+                    iconBorderRadius: BorderRadius.circular(8),
                     title: 'ข้อมูลบิดา',
                     children: [
                       FormTextField(
@@ -133,7 +194,7 @@ class _ScholarshipFormStep2State extends State<ScholarshipFormStep2> {
                   // MOTHER
                   FormSectionCard(
                     icon: Icons.person_outline,
-                    iconBorderRadius: BorderRadius.circular(8), // ← เพิ่ม
+                    iconBorderRadius: BorderRadius.circular(8),
                     title: 'ข้อมูลมารดา',
                     children: [
                       FormTextField(
@@ -173,12 +234,12 @@ class _ScholarshipFormStep2State extends State<ScholarshipFormStep2> {
                   // FAMILY STATUS
                   FormSectionCard(
                     icon: Icons.favorite_outline,
-                    iconBorderRadius: BorderRadius.circular(8), // ← เพิ่ม
+                    iconBorderRadius: BorderRadius.circular(8),
                     title: 'สถานะครอบครัว',
                     iconBgColor: const Color(0xFFFFF0F0),
                     children: [
                       FormDropdown(
-                        label: 'สถาพครอบครัว',
+                        label: 'สภาพครอบครัว',
                         value: _familyStatus,
                         items: _familyStatuses,
                         onChanged: (v) => setState(() => _familyStatus = v!),
@@ -188,7 +249,7 @@ class _ScholarshipFormStep2State extends State<ScholarshipFormStep2> {
                         children: [
                           Expanded(
                             child: FormDropdown(
-                              label: 'จำนวนพี่น้อง(รวมผู้สมัคร)',
+                              label: 'จำนวนพี่น้อง',
                               value: _siblingCount,
                               items: ['1', '2', '3', '4', '5', '6+'],
                               onChanged: (v) =>
@@ -198,7 +259,7 @@ class _ScholarshipFormStep2State extends State<ScholarshipFormStep2> {
                           const SizedBox(width: 10),
                           Expanded(
                             child: FormDropdown(
-                              label: 'ผู้สมัครเป็นลำดับที่',
+                              label: 'ผู้สมัครลำดับที่',
                               value: _applicantOrder,
                               items: ['1', '2', '3', '4', '5', '6+'],
                               onChanged: (v) =>
@@ -209,7 +270,7 @@ class _ScholarshipFormStep2State extends State<ScholarshipFormStep2> {
                       ),
                       const SizedBox(height: 14),
                       FormDropdown(
-                        label: 'รายได้ที่ผู้สมัครได้รับต่อเดือน(บาท)',
+                        label: 'รายได้ที่ผู้สมัครได้รับ/เดือน',
                         value: _applicantIncome,
                         items: _incomeRanges,
                         onChanged: (v) => setState(() => _applicantIncome = v!),
@@ -236,12 +297,7 @@ class _ScholarshipFormStep2State extends State<ScholarshipFormStep2> {
               ),
             ),
           ),
-          FormBottomButtons(
-            onNext: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const ScholarshipFormStep3()),
-            ),
-          ),
+          FormBottomButtons(onNext: _goNext),
           const AppBottomNavBar(activeIndex: 1),
         ],
       ),

@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import '../core/colors.dart';
 import '../core/text_styles.dart';
 import '../core/models.dart';
-import '../widgets/sx_app_bar.dart';
 import '../widgets/applicant_card.dart';
 import 'application_list_screen.dart';
 import 'application_detail_screen.dart';
 import '../widgets/admin_bottom_nav.dart';
+import '/shared/application_repository.dart';
 import '/screens/splash_screen.dart';
+import 'submitted_application_detail_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -46,7 +47,7 @@ class DashboardScreen extends StatelessWidget {
                 ),
               ),
               onTap: () {
-                Navigator.pop(context); // ปิด bottom sheet ก่อน
+                Navigator.pop(context);
                 Navigator.pushAndRemoveUntil(
                   context,
                   PageRouteBuilder(
@@ -55,7 +56,7 @@ class DashboardScreen extends StatelessWidget {
                         FadeTransition(opacity: anim, child: child),
                     transitionDuration: const Duration(milliseconds: 600),
                   ),
-                  (route) => false, // ล้าง stack ทั้งหมด
+                  (route) => false,
                 );
               },
             ),
@@ -66,174 +67,231 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
+  Applicant _toApplicant(ApplicationRecord r) {
+    return Applicant(
+      id: r.id,
+      name: r.fullName,
+      studentId: r.studentId,
+      scholarship: r.scholarshipName,
+      faculty: r.faculty,
+      major: r.major,
+      year: r.year,
+      gpa: r.gpa,
+      address: r.address,
+      email: r.email,
+      date: r.formattedAppliedDate,
+      status: r.status.label,
+      reason: r.reason,
+    );
+  }
+
+void _openDetail(BuildContext context, Applicant a, String? applicationId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) {
+          if (applicationId != null) {
+            return SubmittedApplicationDetailScreen(
+              applicationId: applicationId,
+            );
+          }
+
+          return ApplicationDetailScreen(
+            applicant: a,
+            applicationId: applicationId,
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // ใช้ AppBar แทน SXAppBar เพื่อเพิ่ม actions
-      appBar: AppBar(
-        backgroundColor: SXColor.primary,
-        elevation: 0,
-        title: const Text(
-          'ภาพรวมระบบทุนการศึกษา',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w700,
-            fontSize: 18,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.menu_rounded, color: Colors.white),
-            onPressed: () => _showMenu(context),
-          ),
-        ],
-      ),
-      backgroundColor: SXColor.background,
-      bottomNavigationBar: const AdminBottomNav(currentIndex: 0),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Stat cards 2x2
-            Row(
-              children: [
-                _StatCard(
-                  label: 'ใบสมัครทั้งหมด',
-                  value: '248',
-                  icon: Icons.description,
-                  iconColor: SXColor.primary,
-                ),
-                const SizedBox(width: 12),
-                _StatCard(
-                  label: 'รอดำเนินการ',
-                  value: '45',
-                  icon: Icons.access_time_rounded,
-                  iconColor: SXColor.warning,
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                _StatCard(
-                  label: 'อนุมัติ',
-                  value: '15',
-                  icon: Icons.check_circle_rounded,
-                  iconColor: SXColor.success,
-                ),
-                const SizedBox(width: 12),
-                _StatCard(
-                  label: 'ทุนที่เปิดรับสมัคร',
-                  value: '6',
-                  icon: Icons.workspace_premium_rounded,
-                  iconColor: Colors.blue,
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
+    return ListenableBuilder(
+      listenable: ApplicationRepository.instance,
+      builder: (context, _) {
+        final repo = ApplicationRepository.instance;
+        final repoRecs = repo.all;
+        final repoApps = repoRecs.map(_toApplicant).toList();
 
-            // ใบสมัครล่าสุด
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        // ยอดรวม = repo + mock เดิม
+        final totalCount = repo.totalCount + mockApplicants.length;
+        final pendingCount =
+            repo.pendingCount +
+            mockApplicants.where((a) => a.status == 'รอดำเนินการ').length;
+        final approvedCount =
+            repo.approvedCount +
+            mockApplicants.where((a) => a.status == 'อนุมัติ').length;
+
+        // ใบสมัครล่าสุด: repo records ก่อน แล้วตามด้วย mock
+        final recentApplicants = [
+          ...repoApps,
+          ...mockApplicants,
+        ].take(3).toList();
+
+        const openScholarships = 6;
+
+        return Scaffold(
+          appBar: AppBar(
+            backgroundColor: SXColor.primary,
+            elevation: 0,
+            title: const Text(
+              'ภาพรวมระบบทุนการศึกษา',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: 18,
+              ),
+            ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.menu_rounded, color: Colors.white),
+                onPressed: () => _showMenu(context),
+              ),
+            ],
+          ),
+          backgroundColor: SXColor.background,
+          bottomNavigationBar: const AdminBottomNav(currentIndex: 0),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('ใบสมัครล่าสุด', style: SXText.sectionHeader),
-                GestureDetector(
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const ApplicationListScreen(),
+                // ── Stat Cards ──────────────────────────────────────
+                Row(
+                  children: [
+                    _StatCard(
+                      label: 'ใบสมัครทั้งหมด',
+                      value: '$totalCount',
+                      icon: Icons.description,
+                      iconColor: SXColor.primary,
                     ),
-                  ),
-                  child: Row(
-                    children: [
-                      Text(
-                        'ดูทั้งหมด',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: SXColor.primary,
-                          fontWeight: FontWeight.w700,
+                    const SizedBox(width: 12),
+                    _StatCard(
+                      label: 'รอดำเนินการ',
+                      value: '$pendingCount',
+                      icon: Icons.access_time_rounded,
+                      iconColor: SXColor.warning,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    _StatCard(
+                      label: 'อนุมัติ',
+                      value: '$approvedCount',
+                      icon: Icons.check_circle_rounded,
+                      iconColor: SXColor.success,
+                    ),
+                    const SizedBox(width: 12),
+                    _StatCard(
+                      label: 'ทุนที่เปิดรับสมัคร',
+                      value: '$openScholarships',
+                      icon: Icons.workspace_premium_rounded,
+                      iconColor: Colors.blue,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+
+                // ── ใบสมัครล่าสุด ────────────────────────────────────
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('ใบสมัครล่าสุด', style: SXText.sectionHeader),
+                    GestureDetector(
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ApplicationListScreen(),
                         ),
                       ),
-                      Icon(
-                        Icons.arrow_forward,
-                        size: 16,
-                        color: SXColor.primary,
+                      child: Row(
+                        children: [
+                          Text(
+                            'ดูทั้งหมด',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: SXColor.primary,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          Icon(
+                            Icons.arrow_forward,
+                            size: 16,
+                            color: SXColor.primary,
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            ...mockApplicants
-                .take(3)
-                .map(
-                  (a) => ApplicantCard(
+                const SizedBox(height: 12),
+                ...recentApplicants.map((a) {
+                  // ค้นหา record จาก repo ด้วย findById
+                  final record = ApplicationRepository.instance.findById(a.id);
+                  return ApplicantCard(
                     applicant: a,
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ApplicationDetailScreen(applicant: a),
+                    onTap: () => _openDetail(context, a, record?.id),
+                  );
+                }),
+                const SizedBox(height: 24),
+
+                // ── ใกล้ครบกำหนด ──────────────────────────────────────
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('ใกล้ครบกำหนด', style: SXText.sectionHeader),
+                    GestureDetector(
+                      onTap: () {},
+                      child: Row(
+                        children: [
+                          Text(
+                            'ดูทั้งหมด',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: SXColor.primary,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          Icon(
+                            Icons.arrow_forward,
+                            size: 16,
+                            color: SXColor.primary,
+                          ),
+                        ],
                       ),
                     ),
-                  ),
+                  ],
                 ),
-            const SizedBox(height: 24),
-
-            // ใกล้ครบกำหนด
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('ใกล้ครบกำหนด', style: SXText.sectionHeader),
-                GestureDetector(
-                  onTap: () {},
-                  child: Row(
-                    children: [
-                      Text(
-                        'ดูทั้งหมด',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: SXColor.primary,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      Icon(
-                        Icons.arrow_forward,
-                        size: 16,
-                        color: SXColor.primary,
-                      ),
-                    ],
-                  ),
+                const SizedBox(height: 12),
+                const _DeadlineCard(
+                  days: 28,
+                  scholarship: 'ทุนด้านเทคโนโลยีดิจิทัล',
+                  applicants: 10,
+                  date: '20 ม.ค. 2569',
                 ),
+                const SizedBox(height: 8),
+                const _DeadlineCard(
+                  days: 45,
+                  scholarship: 'ทุนการศึกษาเพื่อความเป็นเลิศทางวิชาการ',
+                  applicants: 15,
+                  date: '31 มี.ค. 2569',
+                ),
+                const SizedBox(height: 24),
               ],
             ),
-            const SizedBox(height: 12),
-            const _DeadlineCard(
-              days: 28,
-              scholarship: 'ทุนด้านเทคโนโลยีดิจิทัล',
-              applicants: 10,
-              date: '20 ม.ค. 2569',
-            ),
-            const SizedBox(height: 8),
-            const _DeadlineCard(
-              days: 28,
-              scholarship: 'ทุนด้านเทคโนโลยีดิจิทัล',
-              applicants: 10,
-              date: '20 ม.ค. 2569',
-            ),
-            const SizedBox(height: 24),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
 
-// ─── Stat Card ────────────────────────────────────────────────────────────────
+// ─── Stat Card ──────────────────────────────────────────────
 class _StatCard extends StatelessWidget {
-  final String label;
-  final String value;
+  final String label, value;
   final IconData icon;
   final Color iconColor;
 
@@ -286,7 +344,7 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-// ─── Deadline Card ────────────────────────────────────────────────────────────
+// ─── Deadline Card ────────────────────────────────────────────
 class _DeadlineCard extends StatefulWidget {
   final int days;
   final String scholarship;

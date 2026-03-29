@@ -63,7 +63,6 @@ class ScholarshipDetailScreen extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  // รายละเอียดทุน
                   _SectionCard(
                     title: 'รายละเอียดทุน',
                     child: Column(
@@ -93,8 +92,6 @@ class ScholarshipDetailScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-
-                  // คุณสมบัติ
                   const _SectionCard(
                     title: 'คุณสมบัติ',
                     child: Column(
@@ -109,8 +106,6 @@ class ScholarshipDetailScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-
-                  // เอกสารที่ต้องใช้
                   const _SectionCard(
                     title: 'เอกสารที่ต้องใช้',
                     child: Column(
@@ -124,8 +119,6 @@ class ScholarshipDetailScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-
-                  // อัปเดตล่าสุด
                   _SectionCard(
                     title: 'อัปเดตล่าสุด',
                     child: Text(
@@ -142,7 +135,7 @@ class ScholarshipDetailScreen extends StatelessWidget {
             ),
           ),
 
-          // ปุ่มสมัคร
+          // ── ปุ่มสมัคร — ส่ง scholarship info ไปยัง Step 1 ──
           Container(
             color: Colors.white,
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
@@ -162,7 +155,11 @@ class ScholarshipDetailScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const ScholarshipFormStep1(),
+                      builder: (_) => ScholarshipFormStep1(
+                        scholarshipId: scholarship.id,
+                        scholarshipName: scholarship.title,
+                        amount: scholarship.amount.toInt(),
+                      ),
                     ),
                   );
                 },
@@ -179,15 +176,11 @@ class ScholarshipDetailScreen extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-//  SECTION CARD
-// ─────────────────────────────────────────────
+// ─── helpers (ไม่เปลี่ยน) ─────────────────────────────────
 class _SectionCard extends StatelessWidget {
   final String title;
   final Widget child;
-
   const _SectionCard({required this.title, required this.child});
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -212,26 +205,17 @@ class _SectionCard extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-//  HELPERS
-// ─────────────────────────────────────────────
 class _DetailText extends StatelessWidget {
   final String text;
   const _DetailText(this.text);
-
   @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: const TextStyle(fontSize: 14, color: Colors.black87),
-    );
-  }
+  Widget build(BuildContext context) =>
+      Text(text, style: const TextStyle(fontSize: 14, color: Colors.black87));
 }
 
 class _BulletItem extends StatelessWidget {
   final String text;
   const _BulletItem(this.text);
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -255,7 +239,6 @@ class _BulletItem extends StatelessWidget {
 class _CheckItem extends StatelessWidget {
   final String text;
   const _CheckItem(this.text);
-
   @override
   Widget build(BuildContext context) {
     return Padding(
