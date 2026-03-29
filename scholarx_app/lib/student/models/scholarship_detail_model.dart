@@ -1,4 +1,4 @@
-import '/features/student/models/student_model.dart';
+import '/student/models/student_model.dart';
 
 // mock data and helpers used throughout the student screens
 

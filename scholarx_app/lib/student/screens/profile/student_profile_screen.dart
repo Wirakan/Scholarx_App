@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '/coreApp/themeApp/app_colors.dart';
 import '/coreApp/themeApp/app_text_style.dart';
-import '/features/student/models/student_model.dart';
+import '/student/models/student_model.dart';
 
 class StudentProfileScreen extends StatelessWidget {
   final StudentModel student;

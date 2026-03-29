@@ -3,9 +3,9 @@
 import 'package:flutter/material.dart';
 import '/coreApp/themeApp/app_colors.dart';
 import '/coreApp/themeApp/app_text_style.dart';
-import '/features/components/scholarship_list_card.dart';
-import '/features/student/models/scholarship_model.dart';
-import '/features/student/screens/scholar/scholarship_detail.dart';
+import '../../components/scholarship_list_card.dart';
+import '/student/models/scholarship_model.dart';
+import '/student/screens/scholar/scholarship_detail.dart';
 
 class ScholarScreen extends StatefulWidget {
   const ScholarScreen({super.key});

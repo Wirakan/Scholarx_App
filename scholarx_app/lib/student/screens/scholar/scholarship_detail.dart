@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '/features/student/models/scholarship_model.dart';
-import '/features/student/screens/form/scholarship_form_step1.dart';
+import '/student/models/scholarship_model.dart';
+import '/student/screens/form/scholarship_form_step1.dart';
 
 class ScholarshipDetailScreen extends StatelessWidget {
   final ScholarshipModel scholarship;

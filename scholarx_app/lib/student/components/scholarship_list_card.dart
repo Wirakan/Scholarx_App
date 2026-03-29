@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import '/coreApp/themeApp/app_colors.dart';
 import '/coreApp/themeApp/app_text_style.dart';
-import '/features/student/models/scholarship_model.dart';
+import '/student/models/scholarship_model.dart';
 
 class ScholarshipListCard extends StatelessWidget {
   final ScholarshipModel scholarship;
