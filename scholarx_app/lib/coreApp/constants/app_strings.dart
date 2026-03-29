@@ -17,8 +17,8 @@ class AppStrings {
   // Bottom Nav
   static const String home = 'Home';
   static const String scholar = 'Scholar';
-  static const String document = 'Document';
-  static const String notification = 'Notif';
+  static const String document = 'Tracking';
+  static const String notification = 'Alert';
   static const String profile = 'Profile';
 
   // Home Screen

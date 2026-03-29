@@ -58,7 +58,7 @@ class ScholarshipListCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
               color: AppColors.primaryBg,
-              borderRadius: BorderRadius.circular(999),
+              borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
               scholarship.categoryLabel,
@@ -92,7 +92,7 @@ class ScholarshipListCard extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     border: Border.all(color: AppColors.primary),
-                    borderRadius: BorderRadius.circular(999),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     'ดูรายละเอียด',

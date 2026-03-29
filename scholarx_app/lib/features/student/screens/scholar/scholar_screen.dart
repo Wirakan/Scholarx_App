@@ -5,6 +5,7 @@ import '/coreApp/themeApp/app_colors.dart';
 import '/coreApp/themeApp/app_text_style.dart';
 import '/features/components/scholarship_list_card.dart';
 import '/features/student/models/scholarship_model.dart';
+import '/features/student/screens/scholar/scholarship_detail.dart';
 
 class ScholarScreen extends StatefulWidget {
   const ScholarScreen({super.key});
@@ -146,7 +147,7 @@ class _ScholarScreenState extends State<ScholarScreen> {
                           color: isSelected
                               ? AppColors.primary
                               : AppColors.background,
-                          borderRadius: BorderRadius.circular(999),
+                          borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: isSelected
                                 ? AppColors.primary
@@ -199,7 +200,14 @@ class _ScholarScreenState extends State<ScholarScreen> {
                     itemBuilder: (ctx, i) => ScholarshipListCard(
                       scholarship: filtered[i],
                       onTap: () {
-                        // TODO: navigate to detail screen
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ScholarshipDetailScreen(
+                              scholarship: filtered[i],
+                            ),
+                          ),
+                        );
                       },
                     ),
                   ),

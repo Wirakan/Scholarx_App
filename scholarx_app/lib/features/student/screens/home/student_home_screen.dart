@@ -1,14 +1,18 @@
+// features/student/screens/home/student_home_screen.dart
+
 import 'package:flutter/material.dart';
 import '/coreApp/themeApp/app_colors.dart';
 import '/coreApp/themeApp/app_text_style.dart';
 import '/coreApp/constants/app_strings.dart';
 import '/features/components/student_card.dart';
 import '/features/student/models/student_model.dart';
+import '/features/student/models/scholarship_detail_model.dart';
+import '/features/student/models/scholarship_model.dart'; // ScholarshipModel
 import '/features/student/screens/profile/student_profile_screen.dart';
 import '/features/student/screens/scholar/scholar_screen.dart';
+import '/features/student/screens/scholar/scholarship_detail.dart';
+import 'package:scholarx_app/features/student/screens/tracking/tracking_screen.dart'; // รับ ScholarshipModel
 
-// features/student/screens/home/student_home_screen.dart
-// แก้ไขจากเดิม: เพิ่ม import ScholarScreen + เปลี่ยน _PlaceholderTab ของ Scholar + onTap ของ action card
 
 class StudentHomeScreen extends StatefulWidget {
   const StudentHomeScreen({super.key});
@@ -19,34 +23,30 @@ class StudentHomeScreen extends StatefulWidget {
 
 class _StudentHomeScreenState extends State<StudentHomeScreen> {
   int _selectedIndex = 0;
-  final StudentModel _student = StudentModel.mock;
 
-  static const List<ScholarshipCardItem> _scholarships = [
-    ScholarshipCardItem(
-      title: 'ทุนการศึกษาเพื่อความเป็นเลิศทางวิชาการ',
-      category: 'สำหรับนักศึกษาระดับปริญญาตรี',
-      categoryColor: '#E8591A',
-      description:
-          'สนับสนุนค่าเล่าเรียนและค่าครองชีพ สำหรับนักศึกษาที่มีผลการเรียนดี และมีความประพฤติดี',
-      updatedAt: '1 ม.ค. 2569',
-    ),
-    ScholarshipCardItem(
-      title: 'ประกาศผลผู้ได้รับทุน รอบที่ 1',
-      category: 'ประจำปีการศึกษา 2569',
-      categoryColor: '#E8591A',
-      description:
-          'ผู้สมัครสามารถตรวจสอบรายชื่อผู้ได้รับทุนและขั้นตอนต่อไปได้ในแอป',
-      updatedAt: '1 ม.ค. 2569',
-    ),
-    ScholarshipCardItem(
-      title: 'ทุนด้านเทคโนโลยีดิจิทัล',
-      category: 'ทุนเฉพาะทาง Digital / IT / Engineering',
-      categoryColor: '#E8591A',
-      description:
-          'มอบทุนให้แก่นักศึกษาที่มีความสนใจด้านเทคโนโลยี นวัตกรรม และการพัฒนาดิจิทัล',
-      updatedAt: '1 ม.ค. 2569',
-    ),
-  ];
+  // ── เปลี่ยนเป็นรับ ScholarshipModel แทน ScholarshipCardItem ──
+  Future<void> _openScholarDetail(ScholarshipModel scholarship) async {
+    setState(() => _selectedIndex = 1);
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ScholarshipDetailScreen(scholarship: scholarship),
+      ),
+    );
+    // หลังกลับจาก form flow ให้ switch ไป Tracking tab (index 2)
+    // ถ้า user กด "กลับหน้าหลัก" จาก success screen
+    // (popUntil จะทำให้ route stack สะอาด แต่ tab ยังไม่เปลี่ยน
+    //  จึง switch ไป Tracking เพื่อให้เห็น list ทุนที่สมัครไว้)
+  }
+
+  void _switchToTracking() {
+    setState(() => _selectedIndex = 2);
+  }
+
+  final StudentModel _student = mockStudent;
+
+  // ── ใช้ ScholarshipModel.mockList แทน mockScholarships ──
+  List<ScholarshipModel> get _scholarships => ScholarshipModel.mockList;
 
   @override
   Widget build(BuildContext context) {
@@ -58,12 +58,16 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
           _HomeTab(
             student: _student,
             scholarships: _scholarships,
-            onGoToScholar: () =>
-                setState(() => _selectedIndex = 1), // ← ส่ง callback
+            onGoToScholar: () => setState(() => _selectedIndex = 1),
+            onGoToTracking: _switchToTracking,
+            onOpenScholarDetail: _openScholarDetail,
           ),
-          const ScholarScreen(), // ← เปลี่ยนจาก _PlaceholderTab เป็น ScholarScreen
-          const _PlaceholderTab(label: 'Document'),
-          const _PlaceholderTab(label: 'Notification'),
+          const ScholarScreen(),
+          TrackingScreen(
+            showBottomNav: false,
+            onNavTap: (i) => setState(() => _selectedIndex = i),
+          ),
+          const _PlaceholderTab(label: 'Alert'),
           StudentProfileScreen(student: _student),
         ],
       ),
@@ -75,16 +79,20 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
   }
 }
 
-// ─── Home Tab ─────────────────────────────────────────────────────────────────
+// ─── Home Tab ────────────────────────────────────────────────────────────────
 class _HomeTab extends StatelessWidget {
   final StudentModel student;
-  final List<ScholarshipCardItem> scholarships;
-  final VoidCallback onGoToScholar; // ← เพิ่ม parameter
+  final List<ScholarshipModel> scholarships;
+  final VoidCallback onGoToScholar;
+  final VoidCallback onGoToTracking;
+  final void Function(ScholarshipModel) onOpenScholarDetail;
 
   const _HomeTab({
     required this.student,
     required this.scholarships,
-    required this.onGoToScholar, // ← เพิ่ม
+    required this.onGoToScholar,
+    required this.onGoToTracking,
+    required this.onOpenScholarDetail,
   });
 
   @override
@@ -97,7 +105,7 @@ class _HomeTab extends StatelessWidget {
           sliver: SliverToBoxAdapter(
             child: Column(
               children: [
-                _GuideBanner(onTap: onGoToScholar), // ← ส่ง onTap
+                _GuideBanner(onTap: onGoToScholar),
                 const SizedBox(height: 16),
                 Row(
                   children: [
@@ -107,7 +115,7 @@ class _HomeTab extends StatelessWidget {
                         subtitle: AppStrings.openScholarships,
                         icon: Icons.emoji_events_rounded,
                         color: AppColors.primary,
-                        onTap: onGoToScholar, // ← navigate ไป Scholar tab
+                        onTap: onGoToScholar,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -117,7 +125,7 @@ class _HomeTab extends StatelessWidget {
                         subtitle: AppStrings.trackScholarshipSub,
                         icon: Icons.receipt_long_rounded,
                         color: const Color(0xFF5C4EE5),
-                        onTap: () {},
+                        onTap: onGoToTracking,
                       ),
                     ),
                   ],
@@ -149,16 +157,25 @@ class _HomeTab extends StatelessWidget {
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
           sliver: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (ctx, i) => Padding(
+            delegate: SliverChildBuilderDelegate((ctx, i) {
+              final s = scholarships[i];
+              // แปลง ScholarshipModel → ScholarshipCardItem เพื่อให้ StudentCard ใช้ได้
+              final cardItem = ScholarshipCardItem(
+                id: s.id,
+                title: s.title,
+                category: s.categoryLabel,
+                categoryColor: '#E8591A',
+                description: s.description,
+                updatedAt: s.deadline,
+              );
+              return Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: StudentCard(
-                  item: scholarships[i],
-                  onTap: onGoToScholar, // ← กด "ดูรายละเอียด" → ไปหน้า Scholar
+                  item: cardItem,
+                  onTap: () => onOpenScholarDetail(s),
                 ),
-              ),
-              childCount: scholarships.length,
-            ),
+              );
+            }, childCount: scholarships.length),
           ),
         ),
       ],
@@ -166,7 +183,7 @@ class _HomeTab extends StatelessWidget {
   }
 }
 
-// ─── Profile Header ───────────────────────────────────────────────────────────
+// ─── Profile Header ──────────────────────────────────────────────────────────
 class _ProfileHeader extends StatelessWidget {
   final StudentModel student;
   const _ProfileHeader({required this.student});
@@ -237,9 +254,9 @@ class _ProfileHeader extends StatelessWidget {
   }
 }
 
-// ─── Guide Banner ─────────────────────────────────────────────────────────────
+// ─── Guide Banner ────────────────────────────────────────────────────────────
 class _GuideBanner extends StatelessWidget {
-  final VoidCallback? onTap; // ← เพิ่ม onTap
+  final VoidCallback? onTap;
   const _GuideBanner({this.onTap});
 
   @override
@@ -252,7 +269,7 @@ class _GuideBanner extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
             color: AppColors.primary.withOpacity(0.35),
@@ -275,7 +292,7 @@ class _GuideBanner extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.25),
-                    borderRadius: BorderRadius.circular(999),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     'แนะนำ',
@@ -304,7 +321,9 @@ class _GuideBanner extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(999),
+                      borderRadius: BorderRadius.circular(
+                        8,
+                      ), // เปลี่ยนจาก 999 → 8
                     ),
                     child: Text(
                       AppStrings.startNow,
@@ -325,7 +344,7 @@ class _GuideBanner extends StatelessWidget {
   }
 }
 
-// ─── Action Card ──────────────────────────────────────────────────────────────
+// ─── Action Card ─────────────────────────────────────────────────────────────
 class _ActionCard extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -349,7 +368,7 @@ class _ActionCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: color,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(
               color: color.withOpacity(0.3),
@@ -393,16 +412,8 @@ class _BottomNav extends StatelessWidget {
     const items = [
       (Icons.home_rounded, Icons.home_outlined, AppStrings.home),
       (Icons.school_rounded, Icons.school_outlined, AppStrings.scholar),
-      (
-        Icons.description_rounded,
-        Icons.description_outlined,
-        AppStrings.document,
-      ),
-      (
-        Icons.notifications_rounded,
-        Icons.notifications_outlined,
-        AppStrings.notification,
-      ),
+      (Icons.fact_check_rounded, Icons.fact_check_outlined, AppStrings.document),
+      (Icons.notifications_rounded, Icons.notifications_outlined, AppStrings.notification),
       (Icons.person_rounded, Icons.person_outlined, AppStrings.profile),
     ];
 
@@ -424,14 +435,26 @@ class _BottomNav extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        isSelected ? items[i].$1 : items[i].$2,
-                        color: isSelected
-                            ? AppColors.primary
-                            : const Color(0xFF9E9E9E),
-                        size: 24,
-                      ),
-                      const SizedBox(height: 3),
+                      isSelected
+                          ? Container(
+                              width: 48,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                color: AppColors.primary,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(
+                                items[i].$1,
+                                color: Colors.white,
+                                size: 22,
+                              ),
+                            )
+                          : Icon(
+                              items[i].$2,
+                              color: const Color(0xFF9E9E9E),
+                              size: 24,
+                            ),
+                      const SizedBox(height: 4),
                       Text(
                         items[i].$3,
                         style: TextStyle(
@@ -456,7 +479,7 @@ class _BottomNav extends StatelessWidget {
   }
 }
 
-// ─── Placeholder Tab ──────────────────────────────────────────────────────────
+// ─── Placeholder Tab ─────────────────────────────────────────────────────────
 class _PlaceholderTab extends StatelessWidget {
   final String label;
   const _PlaceholderTab({required this.label});

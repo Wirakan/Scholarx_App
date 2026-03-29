@@ -72,7 +72,7 @@ void _onLoginWithSSO() {
                     children: [
                       const Center(
                         child: Text(
-                          'Log in',
+                          'เข้าสู่ระบบ',
                           style: TextStyle(
                             color: Color(0xFFFF5722),
                             fontSize: 24,
@@ -82,7 +82,7 @@ void _onLoginWithSSO() {
                       ),
                       const SizedBox(height: 24),
                       const Text(
-                        'Student ID',
+                        'รหัสนักศึกษา',
                         style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                       ),
                       const SizedBox(height: 8),
@@ -93,13 +93,13 @@ void _onLoginWithSSO() {
                       ),
                       const SizedBox(height: 20),
                       const Text(
-                        'Password',
+                        'รหัสผ่าน',
                         style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                       ),
                       const SizedBox(height: 8),
                       InputField(
                         controller: _passwordController,
-                        hint: 'Enter your password',
+                        hint: 'กรุณากรอกรหัสผ่าน',
                         obscureText: _obscurePassword,
                         suffix: IconButton(
                           icon: Icon(
@@ -128,7 +128,7 @@ void _onLoginWithSSO() {
                           ),
                           onPressed: _onLoginWithSSO,
                           child: const Text(
-                            'Log in with SSO',
+                            'เข้าสู่ระบบด้วย SSO',
                             style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                           ),
                         ),
@@ -148,7 +148,7 @@ void _onLoginWithSSO() {
                           ),
                           onPressed: _onLogin,
                           child: const Text(
-                            'Log in',
+                            'เข้าสู่ระบบ',
                             style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                           ),
                         ),
