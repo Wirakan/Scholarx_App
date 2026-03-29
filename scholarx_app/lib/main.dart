@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'coreApp/themeApp/app_theme.dart';
-import 'features/student_routes.dart';
+import 'routes/student_routes.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
