@@ -15,6 +15,8 @@ import '/student/models/scholarship_detail_model.dart';
 import '/student/providers/notification_provider.dart';
 import '/student/screens/profile/student_profile_screen.dart';
 import '/student/screens/scholar/scholar_screen.dart';
+import '/student/models/scholarship_model.dart';
+import '/student/screens/tracking/tracking_screen.dart';
 import '/student/screens/noti/notification_screen.dart';
 import '/student/screens/noti/notification_detail_screen.dart';
 
@@ -28,37 +30,24 @@ class StudentHomeScreen extends StatefulWidget {
 class _StudentHomeScreenState extends State<StudentHomeScreen> {
   int _selectedIndex = 0;
   NotificationModel? _selectedNotification;
-  final StudentModel _student = StudentModel.mock;
 
-  static const List<ScholarshipCardItem> _scholarships = [
-    ScholarshipCardItem(
-      id: 'sch_001',
-      title: 'ทุนการศึกษาเพื่อความเป็นเลิศทางวิชาการ',
-      category: 'สำหรับนักศึกษาระดับปริญญาตรี',
-      categoryColor: '#E8591A',
-      description:
-          'สนับสนุนค่าเล่าเรียนและค่าครองชีพ สำหรับนักศึกษาที่มีผลการเรียนดี และมีความประพฤติดี',
-      updatedAt: '1 ม.ค. 2569',
-    ),
-    ScholarshipCardItem(
-      id: 'sch_002',
-      title: 'ประกาศผลผู้ได้รับทุน รอบที่ 1',
-      category: 'ประจำปีการศึกษา 2569',
-      categoryColor: '#E8591A',
-      description:
-          'ผู้สมัครสามารถตรวจสอบรายชื่อผู้ได้รับทุนและขั้นตอนต่อไปได้ในแอป',
-      updatedAt: '1 ม.ค. 2569',
-    ),
-    ScholarshipCardItem(
-      id: 'sch_003',
-      title: 'ทุนด้านเทคโนโลยีดิจิทัล',
-      category: 'ทุนเฉพาะทาง Digital / IT / Engineering',
-      categoryColor: '#E8591A',
-      description:
-          'มอบทุนให้แก่นักศึกษาที่มีความสนใจด้านเทคโนโลยี นวัตกรรม และการพัฒนาดิจิทัล',
-      updatedAt: '1 ม.ค. 2569',
-    ),
-  ];
+  final StudentModel _student = mockStudent;
+
+  List<ScholarshipModel> get _scholarships => ScholarshipModel.mockList;
+
+  Future<void> _openScholarDetail(ScholarshipModel scholarship) async {
+    setState(() => _selectedIndex = 1);
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ScholarshipDetailScreen(scholarship: scholarship),
+      ),
+    );
+  }
+
+  void _switchToTracking() {
+    setState(() => _selectedIndex = 2);
+  }
 
   void _goToNotifications() {
     setState(() {
@@ -92,14 +81,18 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
             scholarships: _scholarships,
             onGoToScholar: () => setState(() => _selectedIndex = 1),
             onGoToNotifications: _goToNotifications,
+            onGoToTracking: _switchToTracking,
+            onOpenScholarDetail: _openScholarDetail,
           ),
           const ScholarScreen(),
-          const _PlaceholderTab(label: 'Document'),
+          TrackingScreen(
+            showBottomNav: false,
+            onNavTap: (i) => setState(() => _selectedIndex = i),
+          ),
           _selectedNotification != null
               ? NotificationDetailScreen(
                   notification: _selectedNotification!,
-                  onBack: () =>
-                      setState(() => _selectedNotification = null),
+                  onBack: () => setState(() => _selectedNotification = null),
                 )
               : NotificationScreen(
                   onOpenDetail: (model) =>
@@ -126,15 +119,19 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
 
 class _HomeTab extends StatelessWidget {
   final StudentModel student;
-  final List<ScholarshipCardItem> scholarships;
+  final List<ScholarshipModel> scholarships;
   final VoidCallback onGoToScholar;
   final VoidCallback onGoToNotifications;
+  final VoidCallback onGoToTracking;
+  final void Function(ScholarshipModel) onOpenScholarDetail;
 
   const _HomeTab({
     required this.student,
     required this.scholarships,
     required this.onGoToScholar,
     required this.onGoToNotifications,
+    required this.onGoToTracking,
+    required this.onOpenScholarDetail,
   });
 
   @override
@@ -172,7 +169,7 @@ class _HomeTab extends StatelessWidget {
                         subtitle: AppStrings.trackScholarshipSub,
                         icon: Icons.receipt_long_rounded,
                         color: const Color(0xFF5C4EE5),
-                        onTap: () {},
+                        onTap: onGoToTracking,
                       ),
                     ),
                   ],
@@ -201,16 +198,24 @@ class _HomeTab extends StatelessWidget {
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
           sliver: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (ctx, i) => Padding(
+            delegate: SliverChildBuilderDelegate((ctx, i) {
+              final s = scholarships[i];
+              final cardItem = ScholarshipCardItem(
+                id: s.id,
+                title: s.title,
+                category: s.categoryLabel,
+                categoryColor: '#E8591A',
+                description: s.description,
+                updatedAt: s.deadline,
+              );
+              return Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: StudentCard(
-                  item: scholarships[i],
-                  onTap: onGoToScholar,
+                  item: cardItem,
+                  onTap: () => onOpenScholarDetail(s),
                 ),
-              ),
-              childCount: scholarships.length,
-            ),
+              );
+            }, childCount: scholarships.length),
           ),
         ),
       ],
@@ -333,7 +338,7 @@ class _GuideBanner extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
             color: AppColors.primary.withOpacity(0.35),
@@ -354,7 +359,7 @@ class _GuideBanner extends StatelessWidget {
                       horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.25),
-                    borderRadius: BorderRadius.circular(999),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text('แนะนำ',
                       style:
@@ -379,7 +384,7 @@ class _GuideBanner extends StatelessWidget {
                         horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(999),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(AppStrings.startNow,
                         style: AppTextStyle.label
@@ -423,7 +428,7 @@ class _ActionCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: color,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(
               color: color.withOpacity(0.3),
@@ -472,8 +477,16 @@ class _BottomNav extends StatelessWidget {
     const items = [
       (Icons.home_rounded, Icons.home_outlined, AppStrings.home),
       (Icons.school_rounded, Icons.school_outlined, AppStrings.scholar),
-      (Icons.description_rounded, Icons.description_outlined, AppStrings.document),
-      (Icons.notifications_rounded, Icons.notifications_outlined, AppStrings.notification),
+      (
+        Icons.fact_check_rounded,
+        Icons.fact_check_outlined,
+        AppStrings.document,
+      ),
+      (
+        Icons.notifications_rounded,
+        Icons.notifications_outlined,
+        AppStrings.notification,
+      ),
       (Icons.person_rounded, Icons.person_outlined, AppStrings.profile),
     ];
 
@@ -498,45 +511,27 @@ class _BottomNav extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Icon(
-                            isSelected ? items[i].$1 : items[i].$2,
-                            color: isSelected
-                                ? AppColors.primary
-                                : const Color(0xFF9E9E9E),
-                            size: 24,
-                          ),
-                          // Badge บน notification tab
-                          if (isNotifTab && unreadCount > 0 && !isSelected)
-                            Positioned(
-                              right: -6,
-                              top: -4,
-                              child: Container(
-                                padding: const EdgeInsets.all(2),
-                                constraints: const BoxConstraints(
-                                    minWidth: 16, minHeight: 16),
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFFE53935),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Text(
-                                  unreadCount > 9
-                                      ? '9+'
-                                      : '$unreadCount',
-                                  style: const TextStyle(
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.white,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
+                      // ── pill highlight เมื่อ selected ──
+                      isSelected
+                          ? Container(
+                              width: 48,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                color: AppColors.primary,
+                                borderRadius: BorderRadius.circular(8),
                               ),
+                              child: Icon(
+                                items[i].$1,
+                                color: Colors.white,
+                                size: 22,
+                              ),
+                            )
+                          : Icon(
+                              items[i].$2,
+                              color: const Color(0xFF9E9E9E),
+                              size: 24,
                             ),
-                        ],
-                      ),
-                      const SizedBox(height: 3),
+                      const SizedBox(height: 4),
                       Text(
                         items[i].$3,
                         style: TextStyle(
