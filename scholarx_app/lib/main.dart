@@ -30,4 +30,4 @@ class ScholarXApp extends StatelessWidget {
 // void main() {
 //   runApp(const ScholarshipApp());
 // }
-}
+
