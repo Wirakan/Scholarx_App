@@ -20,8 +20,6 @@ class StudentProfileScreen extends StatelessWidget {
               delegate: SliverChildListDelegate([
                 _InfoSection(student: student),
                 const SizedBox(height: 16),
-                _StatsRow(gpa: student.gpa),
-                const SizedBox(height: 16),
                 _MenuSection(),
                 const SizedBox(height: 24),
               ]),
