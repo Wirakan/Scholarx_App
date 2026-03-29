@@ -18,13 +18,7 @@ class _ScholarScreenState extends State<ScholarScreen> {
   ScholarshipCategory _selectedCategory = ScholarshipCategory.all;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-
-  // ── Filter state ──────────────────────────────────────────────────
-  ScholarshipCategory? _filterCategory;           // null = ไม่กรอง
-  RangeValues _amountRange = const RangeValues(0, 200000);
-  bool _openOnly = false;
-
-  static const double _maxAmount = 200000;
+  ScholarshipCategory? _filterCategory;
 
   @override
   void dispose() {
@@ -32,35 +26,20 @@ class _ScholarScreenState extends State<ScholarScreen> {
     super.dispose();
   }
 
-  bool get _hasActiveFilter =>
-      _filterCategory != null || _openOnly || _amountRange != const RangeValues(0, _maxAmount);
+  bool get _hasActiveFilter => _filterCategory != null;
 
   List<ScholarshipModel> get _filtered {
     return ScholarshipModel.mockList.where((s) {
-      // category tab
       final matchCat =
           _selectedCategory == ScholarshipCategory.all ||
           s.category == _selectedCategory;
-
-      // search
       final matchSearch =
           _searchQuery.isEmpty ||
           s.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           s.description.toLowerCase().contains(_searchQuery.toLowerCase());
-
-      // filter sheet — category
       final matchFilterCat =
           _filterCategory == null || s.category == _filterCategory;
-
-      // filter sheet — amount (ถ้า model มี field amount ให้ปรับตรงนี้)
-      // ใช้ตัวอย่างเฉยๆ เพราะ mock อาจไม่มี field amount
-      // final matchAmount = s.amount >= _amountRange.start && s.amount <= _amountRange.end;
-
-      // filter sheet — open only (ถ้า model มี isOpen)
-      // final matchOpen = !_openOnly || s.isOpen;
-
       return matchCat && matchSearch && matchFilterCat;
-      // ถ้า model มี field ครบให้เพิ่ม && matchAmount && matchOpen
     }).toList();
   }
 
@@ -72,12 +51,8 @@ class _ScholarScreenState extends State<ScholarScreen> {
     ScholarshipCategory.innovation,
   ];
 
-  // ── Filter Bottom Sheet ───────────────────────────────────────────
   void _showFilterSheet() {
-    // local state สำหรับ sheet (จะ apply เมื่อกด "นำไปใช้")
     ScholarshipCategory? tempCategory = _filterCategory;
-    RangeValues tempRange = _amountRange;
-    bool tempOpenOnly = _openOnly;
 
     showModalBottomSheet(
       context: context,
@@ -123,8 +98,6 @@ class _ScholarScreenState extends State<ScholarScreen> {
                         onPressed: () {
                           setSheetState(() {
                             tempCategory = null;
-                            tempRange = const RangeValues(0, _maxAmount);
-                            tempOpenOnly = false;
                           });
                         },
                         child: Text(
@@ -149,66 +122,49 @@ class _ScholarScreenState extends State<ScholarScreen> {
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: [
-                      ScholarshipCategory.bachelor,
-                      ScholarshipCategory.research,
-                      ScholarshipCategory.assistance,
-                      ScholarshipCategory.innovation,
-                    ].map((cat) {
-                      final isSelected = tempCategory == cat;
-                      return GestureDetector(
-                        onTap: () => setSheetState(
-                          () => tempCategory = isSelected ? null : cat,
-                        ),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 150),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? AppColors.primary
-                                : AppColors.background,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: isSelected
-                                  ? AppColors.primary
-                                  : AppColors.border,
+                    children:
+                        [
+                          ScholarshipCategory.bachelor,
+                          ScholarshipCategory.research,
+                          ScholarshipCategory.assistance,
+                          ScholarshipCategory.innovation,
+                        ].map((cat) {
+                          final isSelected = tempCategory == cat;
+                          return GestureDetector(
+                            onTap: () => setSheetState(
+                              () => tempCategory = isSelected ? null : cat,
                             ),
-                          ),
-                          child: Text(
-                            cat.label,
-                            style: AppTextStyle.label.copyWith(
-                              color: isSelected
-                                  ? Colors.white
-                                  : AppColors.textSecondary,
-                              fontSize: 13,
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 150),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? AppColors.primary
+                                    : AppColors.background,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? AppColors.primary
+                                      : AppColors.border,
+                                ),
+                              ),
+                              child: Text(
+                                cat.label,
+                                style: AppTextStyle.label.copyWith(
+                                  color: isSelected
+                                      ? Colors.white
+                                      : AppColors.textSecondary,
+                                  fontSize: 13,
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
+                          );
+                        }).toList(),
                   ),
-                  const SizedBox(height: 20),
-
-                  // ── เปิดรับสมัครอยู่ ──────────────────────────────
-                  Row(
-                    children: [
-                      Text(
-                        'เปิดรับสมัครอยู่เท่านั้น',
-                        style: AppTextStyle.body,
-                      ),
-                      const Spacer(),
-                      Switch(
-                        value: tempOpenOnly,
-                        activeColor: AppColors.primary,
-                        onChanged: (v) =>
-                            setSheetState(() => tempOpenOnly = v),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 24),
 
                   const Divider(),
                   const SizedBox(height: 8),
@@ -228,8 +184,6 @@ class _ScholarScreenState extends State<ScholarScreen> {
                       onPressed: () {
                         setState(() {
                           _filterCategory = tempCategory;
-                          _amountRange = tempRange;
-                          _openOnly = tempOpenOnly;
                         });
                         Navigator.pop(ctx);
                       },
@@ -287,14 +241,9 @@ class _ScholarScreenState extends State<ScholarScreen> {
                 // ── Search bar + Filter button ─────────────────────
                 Row(
                   children: [
-                    // Search bar (ขยายเต็ม)
                     Expanded(
-                      child: Container(
+                      child: SizedBox(
                         height: 48,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(100),
-                        ),
                         child: TextField(
                           controller: _searchController,
                           onChanged: (v) => setState(() => _searchQuery = v),
@@ -322,7 +271,20 @@ class _ScholarScreenState extends State<ScholarScreen> {
                                     },
                                   )
                                 : null,
-                            border: InputBorder.none,
+                              border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide.none,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide.none,
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide.none,
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
                             contentPadding: const EdgeInsets.symmetric(
                               vertical: 14,
                               horizontal: 16,
@@ -356,13 +318,12 @@ class _ScholarScreenState extends State<ScholarScreen> {
                           alignment: Alignment.center,
                           children: [
                             Icon(
-                              Icons.tune_rounded,
+                              Icons.filter_list_rounded,
                               color: _hasActiveFilter
                                   ? AppColors.primary
                                   : Colors.white,
                               size: 22,
                             ),
-                            // Badge แสดงว่า filter ถูก active
                             if (_hasActiveFilter)
                               Positioned(
                                 top: 8,
@@ -434,29 +395,19 @@ class _ScholarScreenState extends State<ScholarScreen> {
             ),
           ),
 
-          // ── Active filter chips (แสดงเมื่อมี filter) ──────────────
+          // ── Active filter chip ─────────────────────────────────────
           if (_hasActiveFilter)
             Container(
               width: double.infinity,
               color: AppColors.surface,
-              padding: const EdgeInsets.only(
-                left: 16,
-                right: 16,
-                bottom: 10,
-              ),
+              padding: const EdgeInsets.only(left: 16, right: 16, bottom: 10),
               child: Wrap(
                 spacing: 6,
                 children: [
                   if (_filterCategory != null)
                     _FilterChip(
                       label: _filterCategory!.label,
-                      onRemove: () =>
-                          setState(() => _filterCategory = null),
-                    ),
-                  if (_openOnly)
-                    _FilterChip(
-                      label: 'เปิดรับสมัคร',
-                      onRemove: () => setState(() => _openOnly = false),
+                      onRemove: () => setState(() => _filterCategory = null),
                     ),
                 ],
               ),

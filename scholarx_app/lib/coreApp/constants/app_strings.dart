@@ -15,11 +15,11 @@ class AppStrings {
   static const String forgotPassword = 'ลืมรหัสผ่าน?';
 
   // Bottom Nav
-  static const String home = 'Home';
-  static const String scholar = 'Scholar';
-  static const String document = 'Tracking';
-  static const String notification = 'Alert';
-  static const String profile = 'Profile';
+  static const String home = 'หน้าแรก';
+  static const String scholar = 'ทุน';
+  static const String document = 'ติดตาม';
+  static const String notification = 'แจ้งเตือน';
+  static const String profile = 'บัญชีผู้ใช้';
 
   // Home Screen
   static const String announcementAndNews = 'ประกาศและข่าวสาร';
