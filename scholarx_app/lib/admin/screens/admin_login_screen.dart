@@ -197,7 +197,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                                     strokeWidth: 2,
                                   ),
                                 )
-                              : const Text('Log in with SSO'),
+                              : const Text('เข้าสู่ระบบด้วย SSO'),
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -220,7 +220,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                               fontWeight: FontWeight.w700,
                             ),
                           ),
-                          child: const Text('Log in'),
+                          child: const Text('เข้าสู่ระบบ'),
                         ),
                       ),
                     ],

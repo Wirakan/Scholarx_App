@@ -1,33 +1,12 @@
 import 'package:flutter/material.dart';
+import '/shared/application_repository.dart';
+import '/student/models/student_model.dart';
 import '/student/models/notification_model.dart';
+import 'notification_detail_screen.dart';
 
-// ===== MOCK DATA (replace with API/provider) =====
-final List<NotificationItem> _mockNotifications = [
-  NotificationItem(
-    id: '1',
-    type: NotificationType.status,
-    title: 'ใบสมัครของคุณสำหรับทุนด้านเทคโนโลยีดิจิทัล กำลังอยู่ระหว่างการพิจารณา',
-    statusLabel: 'กำลังพิจารณา',
-    status: ApplicationStatus.pending,
-    createdAt: DateTime.now(),
-  ),
-  NotificationItem(
-    id: '2',
-    type: NotificationType.announcement,
-    title: 'ทุน ASEAN Future Leaders เปิดรับสมัครแล้ว สมัครได้เลย',
-    createdAt: DateTime.now().subtract(const Duration(days: 1)),
-  ),
-  NotificationItem(
-    id: '3',
-    type: NotificationType.announcement,
-    title: 'เงื่อนไขของทุน AI & Robotics Engineering มีการอัปเดต กรุณาตรวจสอบรายละเอียดล่าสุด',
-    createdAt: DateTime.now().subtract(const Duration(days: 3)),
-  ),
-];
-
-// ===== SCREEN =====
 class NotificationScreen extends StatefulWidget {
   final void Function(NotificationModel)? onOpenDetail;
+
   const NotificationScreen({super.key, this.onOpenDetail});
 
   @override
@@ -36,39 +15,77 @@ class NotificationScreen extends StatefulWidget {
 
 class _NotificationScreenState extends State<NotificationScreen> {
   int _selectedTab = 0;
+  final String _studentId = StudentModel.mock.studentId;
 
-  List<NotificationItem> get _filtered {
-    if (_selectedTab == 1) {
-      return _mockNotifications
-          .where((n) => n.type == NotificationType.status)
-          .toList();
-    } else if (_selectedTab == 2) {
-      return _mockNotifications
-          .where((n) => n.type == NotificationType.announcement)
-          .toList();
-    }
-    return _mockNotifications;
+  List<_NotifItem> _buildItems() {
+    final repo = ApplicationRepository.instance;
+    final records = repo.byStudent(_studentId);
+
+    final statusItems = records.map((record) {
+      return _NotifItem.status(record);
+    }).toList();
+
+    final activityItems = <_NotifItem>[
+      _NotifItem.announcement(
+        id: 'ann-1',
+        title: 'ทุน ASEAN Future Leaders เปิดรับสมัครแล้ว สมัครได้เลย',
+        message:
+            'เปิดรับสมัครทุน ASEAN Future Leaders สำหรับนักศึกษาที่มีผลการเรียนดีและมีศักยภาพด้านผู้นำ สามารถตรวจสอบคุณสมบัติและยื่นใบสมัครได้ในระบบ',
+        createdAt: DateTime.now().subtract(const Duration(days: 1)),
+      ),
+      _NotifItem.announcement(
+        id: 'ann-2',
+        title:
+            'เงื่อนไขของทุน AI & Robotics Engineering มีการอัปเดต กรุณาตรวจสอบรายละเอียดล่าสุด',
+        message:
+            'มีการอัปเดตคุณสมบัติผู้สมัครและเอกสารที่ต้องใช้สำหรับทุน AI & Robotics Engineering กรุณาเปิดดูรายละเอียดก่อนส่งใบสมัคร',
+        createdAt: DateTime.now().subtract(const Duration(days: 3)),
+      ),
+      _NotifItem.announcement(
+        id: 'ann-3',
+        title: 'กำหนดการสัมภาษณ์ทุนการศึกษาประจำภาคเรียนนี้ถูกประกาศแล้ว',
+        message:
+            'ผู้สมัครที่ผ่านการคัดกรองเบื้องต้นสามารถตรวจสอบวัน เวลา และสถานที่สัมภาษณ์ได้จากหน้ารายละเอียดทุนหรือประกาศในระบบ',
+        createdAt: DateTime.now().subtract(const Duration(days: 8)),
+      ),
+    ];
+
+    final all = [...statusItems, ...activityItems];
+    all.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return all;
   }
 
-  Map<String, List<NotificationItem>> _grouped(List<NotificationItem> items) {
+  List<_NotifItem> get _filteredItems {
+    final all = _buildItems();
+
+    if (_selectedTab == 1) {
+      return all.where((item) => item.isStatus).toList();
+    }
+
+    if (_selectedTab == 2) {
+      return all.where((item) => !item.isStatus).toList();
+    }
+
+    return all;
+  }
+
+  Map<String, List<_NotifItem>> _grouped(List<_NotifItem> items) {
     final now = DateTime.now();
     final todayStart = DateTime(now.year, now.month, now.day);
     final weekStart = todayStart.subtract(const Duration(days: 6));
 
-    final Map<String, List<NotificationItem>> grouped = {
+    final grouped = <String, List<_NotifItem>>{
       'วันนี้': [],
       'สัปดาห์นี้': [],
-      'เก่ากว่า': [],
     };
 
     for (final item in items) {
-      final d = item.createdAt;
-      if (d.isAfter(todayStart) || _isSameDay(d, todayStart)) {
+      final updatedAt = item.createdAt;
+
+      if (_isSameDay(updatedAt, todayStart) || updatedAt.isAfter(todayStart)) {
         grouped['วันนี้']!.add(item);
-      } else if (d.isAfter(weekStart)) {
+      } else if (updatedAt.isAfter(weekStart)) {
         grouped['สัปดาห์นี้']!.add(item);
-      } else {
-        grouped['เก่ากว่า']!.add(item);
       }
     }
 
@@ -76,18 +93,18 @@ class _NotificationScreenState extends State<NotificationScreen> {
     return grouped;
   }
 
-  bool _isSameDay(DateTime a, DateTime b) =>
-      a.year == b.year && a.month == b.month && a.day == b.day;
+  bool _isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
 
   String _timeAgo(DateTime date) {
     final now = DateTime.now();
     final todayStart = DateTime(now.year, now.month, now.day);
     final diff = now.difference(date);
 
-    if (date.isAfter(todayStart) || _isSameDay(date, todayStart)) {
-      final h = date.hour.toString().padLeft(2, '0');
-      final m = date.minute.toString().padLeft(2, '0');
-      return '$h:$m น.';
+    if (_isSameDay(date, todayStart) || date.isAfter(todayStart)) {
+      return '${date.hour.toString().padLeft(2, '0')}:'
+          '${date.minute.toString().padLeft(2, '0')} น.';
     } else if (diff.inDays == 1) {
       return '1 วันที่แล้ว';
     } else if (diff.inDays < 7) {
@@ -97,45 +114,90 @@ class _NotificationScreenState extends State<NotificationScreen> {
     }
   }
 
+  String _statusLabel(ApplicationStatus status) {
+    switch (status) {
+      case ApplicationStatus.pending:
+        return 'รอดำเนินการ';
+      case ApplicationStatus.reviewing:
+        return 'กำลังพิจารณา';
+      case ApplicationStatus.approved:
+        return 'อนุมัติแล้ว';
+      case ApplicationStatus.rejected:
+        return 'ไม่ผ่านการพิจารณา';
+    }
+  }
+
+  Color _statusColor(ApplicationStatus status) {
+    switch (status) {
+      case ApplicationStatus.pending:
+        return const Color(0xFFFF6B35);
+      case ApplicationStatus.reviewing:
+        return const Color(0xFFFF6B35);
+      case ApplicationStatus.approved:
+        return const Color(0xFF16A34A);
+      case ApplicationStatus.rejected:
+        return const Color(0xFFDC2626);
+    }
+  }
+
+  IconData _statusIcon(ApplicationStatus status) {
+    switch (status) {
+      case ApplicationStatus.pending:
+        return Icons.assignment_outlined;
+      case ApplicationStatus.reviewing:
+        return Icons.assignment_outlined;
+      case ApplicationStatus.approved:
+        return Icons.check_circle_outline_rounded;
+      case ApplicationStatus.rejected:
+        return Icons.cancel_outlined;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final grouped = _grouped(_filtered);
-    final totalCount = _mockNotifications.length;
+    return ListenableBuilder(
+      listenable: ApplicationRepository.instance,
+      builder: (context, _) {
+        final all = _buildItems();
+        final grouped = _grouped(_filteredItems);
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
-      body: Column(
-        children: [
-          _buildHeader(totalCount),
-          _buildTabs(),
-          Expanded(
-            child: grouped.isEmpty
-                ? const Center(
-                    child: Text(
-                      'ไม่มีการแจ้งเตือน',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  )
-                : ListView(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 8),
-                    children: [
-                      for (final entry in grouped.entries) ...[
-                        _buildGroupHeader(entry.key),
-                        const SizedBox(height: 8),
-                        for (final item in entry.value)
-                          _buildNotificationCard(item),
-                        const SizedBox(height: 8),
-                      ],
-                    ],
-                  ),
+        return Scaffold(
+          backgroundColor: const Color(0xFFF5F5F5),
+          body: Column(
+            children: [
+              _buildHeader(all.length),
+              _buildTabs(),
+              Expanded(
+                child: grouped.isEmpty
+                    ? const Center(
+                        child: Text(
+                          'ไม่มีการแจ้งเตือน',
+                          style: TextStyle(color: Colors.grey, fontSize: 14),
+                        ),
+                      )
+                    : ListView(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        children: [
+                          for (final entry in grouped.entries) ...[
+                            _buildGroupHeader(entry.key),
+                            const SizedBox(height: 8),
+                            for (final item in entry.value) _buildCard(item),
+                            const SizedBox(height: 8),
+                          ],
+                        ],
+                      ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildHeader(int totalCount) {
+  Widget _buildHeader(int count) {
     return Container(
       width: double.infinity,
       decoration: const BoxDecoration(
@@ -164,7 +226,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            'การแจ้งเตือนทั้งหมด $totalCount รายการ',
+            'การแจ้งเตือนทั้งหมด $count รายการ',
             style: const TextStyle(color: Colors.white, fontSize: 14),
           ),
         ],
@@ -174,35 +236,59 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   Widget _buildTabs() {
     const labels = ['ทั้งหมด', 'ข้อความ', 'กิจกรรม'];
+
     return Container(
+      width: double.infinity,
       color: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        children: List.generate(labels.length, (i) {
-          final selected = _selectedTab == i;
-          return GestureDetector(
-            onTap: () => setState(() => _selectedTab = i),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              margin: const EdgeInsets.only(right: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-              decoration: BoxDecoration(
-                color: selected
-                    ? const Color(0xFFFF5722)
-                    : const Color(0xFFF0F0F0),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                labels[i],
-                style: TextStyle(
-                  color: selected ? Colors.white : Colors.black87,
-                  fontWeight: FontWeight.w500,
-                  fontSize: 14,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: List.generate(labels.length, (index) {
+            final selected = _selectedTab == index;
+
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedTab = index;
+                  });
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: selected
+                        ? const Color(0xFFEB591A)
+                        : Colors.transparent,
+                    border: Border.all(
+                      color: selected
+                          ? const Color(0xFFEB591A)
+                          : const Color(0xFFE0E0E0),
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    labels[index],
+                    style:
+                        const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ).copyWith(
+                          color: selected
+                              ? Colors.white
+                              : const Color(0xFF757575),
+                        ),
+                  ),
                 ),
               ),
-            ),
-          );
-        }),
+            );
+          }),
+        ),
       ),
     );
   }
@@ -218,23 +304,165 @@ class _NotificationScreenState extends State<NotificationScreen> {
     );
   }
 
-  Widget _buildNotificationCard(NotificationItem item) {
-    final isStatus = item.type == NotificationType.status;
+  Widget _buildCard(_NotifItem item) {
+    if (item.isStatus && item.record != null) {
+      final record = item.record!;
+      final notifModel = NotificationModel(
+        id: record.id,
+        scholarshipName: record.scholarshipName,
+        status: record.status,
+        createdAt: record.updatedAt,
+        isRead: record.studentNotified,
+        type: NotificationType.status,
+      );
 
-    final notificationModel = (isStatus && item.status != null)
-        ? NotificationModel(
-            id: item.id,
-            scholarshipName: item.title,
-            status: item.status!,
-            createdAt: item.createdAt,
-            isRead: item.isRead,
-          )
-        : null;
+      final statusColor = _statusColor(record.status);
+
+      return GestureDetector(
+        onTap: () {
+          ApplicationRepository.instance.markNotified(record.id);
+
+          if (widget.onOpenDetail != null) {
+            widget.onOpenDetail!(notifModel);
+          } else {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) =>
+                    NotificationDetailScreen(notification: notifModel),
+              ),
+            );
+          }
+        },
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: record.studentNotified
+                ? Colors.white
+                : const Color(0xFFFFF8F6),
+            borderRadius: BorderRadius.circular(14),
+            border: record.studentNotified
+                ? null
+                : Border.all(color: const Color(0xFFFF5722).withOpacity(0.3)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFFF0EC),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  _statusIcon(record.status),
+                  color: statusColor,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Wrap(
+                            spacing: 8,
+                            runSpacing: 6,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: statusColor.withOpacity(0.12),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  _statusLabel(record.status),
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: statusColor,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Text(
+                          _timeAgo(record.updatedAt),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'ใบสมัคร ${record.scholarshipName} — ${_statusLabel(record.status)}',
+                      style: const TextStyle(
+                        fontSize: 13.5,
+                        color: Colors.black87,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (!record.studentNotified)
+                Container(
+                  width: 8,
+                  height: 8,
+                  margin: const EdgeInsets.only(top: 4, left: 4),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFFF5722),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final notifModel = NotificationModel(
+      id: item.id!,
+      scholarshipName: item.title ?? 'ประกาศ',
+      status: ApplicationStatus.pending,
+      createdAt: item.createdAt,
+      isRead: item.isRead,
+      type: NotificationType.announcement,
+      customTitle: item.title,
+      customMessage: item.message,
+    );
 
     return GestureDetector(
       onTap: () {
-        if (notificationModel != null) {
-          widget.onOpenDetail?.call(notificationModel);
+        if (widget.onOpenDetail != null) {
+          widget.onOpenDetail!(notifModel);
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) =>
+                  NotificationDetailScreen(notification: notifModel),
+            ),
+          );
         }
       },
       child: Container(
@@ -257,19 +485,13 @@ class _NotificationScreenState extends State<NotificationScreen> {
             Container(
               width: 46,
               height: 46,
-              decoration: BoxDecoration(
-                color: isStatus
-                    ? const Color(0xFFFFF0EC)
-                    : const Color(0xFFF3EEFF),
+              decoration: const BoxDecoration(
+                color: Color(0xFFF3EEFF),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                isStatus
-                    ? Icons.assignment_outlined
-                    : Icons.campaign_outlined,
-                color: isStatus
-                    ? const Color(0xFFFF5722)
-                    : const Color(0xFF7B2FF7),
+              child: const Icon(
+                Icons.campaign_outlined,
+                color: Color(0xFF7B2FF7),
                 size: 22,
               ),
             ),
@@ -279,28 +501,32 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: isStatus
-                              ? const Color(0xFFFFE5DC)
-                              : const Color(0xFFEEE0FF),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          isStatus
-                              ? (item.statusLabel ?? 'อัปเดตสถานะ')
-                              : 'ประกาศ!',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: isStatus
-                                ? const Color(0xFFFF5722)
-                                : const Color(0xFF7B2FF7),
-                          ),
+                      Expanded(
+                        child: Wrap(
+                          spacing: 8,
+                          runSpacing: 6,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFEEE0FF),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: const Text(
+                                'ประกาศ!',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF7B2FF7),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       Text(
@@ -314,7 +540,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    item.title,
+                    item.title ?? '',
                     style: const TextStyle(
                       fontSize: 13.5,
                       color: Colors.black87,
@@ -327,6 +553,57 @@ class _NotificationScreenState extends State<NotificationScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _NotifItem {
+  final ApplicationRecord? record;
+  final bool isStatus;
+
+  final String? id;
+  final String? title;
+  final String? message;
+  final DateTime createdAt;
+  final bool isRead;
+
+  const _NotifItem({
+    required this.record,
+    required this.isStatus,
+    required this.id,
+    required this.title,
+    required this.message,
+    required this.createdAt,
+    required this.isRead,
+  });
+
+  factory _NotifItem.status(ApplicationRecord record) {
+    return _NotifItem(
+      record: record,
+      isStatus: true,
+      id: record.id,
+      title: 'ใบสมัคร ${record.scholarshipName}',
+      message: null,
+      createdAt: record.updatedAt,
+      isRead: record.studentNotified,
+    );
+  }
+
+  factory _NotifItem.announcement({
+    required String id,
+    required String title,
+    required String message,
+    required DateTime createdAt,
+    bool isRead = true,
+  }) {
+    return _NotifItem(
+      record: null,
+      isStatus: false,
+      id: id,
+      title: title,
+      message: message,
+      createdAt: createdAt,
+      isRead: isRead,
     );
   }
 }

@@ -43,7 +43,7 @@ final mockApplicants = [
     address: '120 ถ.ชาตะผดุง ต.ในเมือง อ.เมือง จ.ขอนแก่น 40000',
     email: 'somchai.p@kkumail.com',
     date: '20 ม.ค. 2569',
-    status: 'รอดำเนินการ',
+    status: 'ปฏิเสธ',
     reason: 'ต้องการทุนการศึกษาเพื่อพัฒนาโครงการด้านวิศวกรรมซอฟต์แวร์และลดภาระค่าใช้จ่ายของครอบครัว รวมถึงต้องการเวลาในการเรียนและทำกิจกรรมวิชาการมากขึ้น',
   ),
   const Applicant(
@@ -58,7 +58,7 @@ final mockApplicants = [
     address: '45 ถ.มิตรภาพ ต.สาวะถี อ.เมือง จ.ขอนแก่น 40000',
     email: 'sommai.k@kkumail.com',
     date: '19 ม.ค. 2569',
-    status: 'รอดำเนินการ',
+    status: 'อนุมัติ',
     reason: 'มีความตั้งใจในการศึกษาและต้องการพัฒนาทักษะด้านคณิตศาสตร์ประยุกต์เพื่อนำไปใช้ในการวิจัย',
   ),
   const Applicant(
@@ -73,7 +73,7 @@ final mockApplicants = [
     address: '78 ถ.กลางเมือง ต.พระลับ อ.เมือง จ.ขอนแก่น 40000',
     email: 'wipawadee.r@kkumail.com',
     date: '18 ม.ค. 2569',
-    status: 'กำลังพิจารณา',
+    status: 'อนุมัติ',
     reason: 'ต้องการสนับสนุนการพัฒนาโครงการ AI สำหรับการศึกษาพิเศษ',
   ),
   const Applicant(
@@ -88,7 +88,7 @@ final mockApplicants = [
     address: '33 ถ.นาเมือง ต.บ้านทุ่ม อ.เมือง จ.ขอนแก่น 40000',
     email: 'thanakorn.p@kkumail.com',
     date: '17 ม.ค. 2569',
-    status: 'อนุมัติ',
+    status: 'ปฏิเสธ',
     reason: 'ต้องการทุนเพื่อสนับสนุนการทำวิจัยด้านการตลาดดิจิทัล',
   ),
   const Applicant(

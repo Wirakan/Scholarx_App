@@ -1,5 +1,3 @@
-// features/student/screens/home/student_home_screen.dart
-
 import 'package:flutter/material.dart';
 import '/coreApp/themeApp/app_colors.dart';
 import '/coreApp/themeApp/app_text_style.dart';
@@ -17,19 +15,27 @@ import '/student/screens/noti/notification_screen.dart';
 import '/student/screens/noti/notification_detail_screen.dart';
 
 class StudentHomeScreen extends StatefulWidget {
-  const StudentHomeScreen({super.key});
+  final int initialIndex;
+
+  const StudentHomeScreen({super.key, this.initialIndex = 0});
 
   @override
   State<StudentHomeScreen> createState() => _StudentHomeScreenState();
 }
 
 class _StudentHomeScreenState extends State<StudentHomeScreen> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
   NotificationModel? _selectedNotification;
 
   final StudentModel _student = mockStudent;
 
   List<ScholarshipModel> get _scholarships => ScholarshipModel.mockList;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex;
+  }
 
   Future<void> _openScholarDetail(ScholarshipModel scholarship) async {
     setState(() => _selectedIndex = 1);
@@ -52,12 +58,16 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
       body: IndexedStack(
         index: _selectedIndex,
         children: [
-          _HomeTab(
+        _HomeTab(
             student: _student,
             scholarships: _scholarships,
             onGoToScholar: () => setState(() => _selectedIndex = 1),
             onGoToTracking: _switchToTracking,
             onOpenScholarDetail: _openScholarDetail,
+            onOpenAlert: () => setState(() {
+              _selectedIndex = 3;
+              _selectedNotification = null;
+            }),
           ),
           const ScholarScreen(),
           TrackingScreen(
@@ -80,7 +90,9 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
         selectedIndex: _selectedIndex,
         onTap: (i) => setState(() {
           _selectedIndex = i;
-          if (i == 3) _selectedNotification = null;
+          if (i == 3) {
+            _selectedNotification = null;
+          }
         }),
       ),
     );
@@ -93,6 +105,7 @@ class _HomeTab extends StatelessWidget {
   final List<ScholarshipModel> scholarships;
   final VoidCallback onGoToScholar;
   final VoidCallback onGoToTracking;
+  final VoidCallback onOpenAlert;
   final void Function(ScholarshipModel) onOpenScholarDetail;
 
   const _HomeTab({
@@ -100,6 +113,7 @@ class _HomeTab extends StatelessWidget {
     required this.scholarships,
     required this.onGoToScholar,
     required this.onGoToTracking,
+    required this.onOpenAlert,
     required this.onOpenScholarDetail,
   });
 
@@ -107,7 +121,9 @@ class _HomeTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomScrollView(
       slivers: [
-        SliverToBoxAdapter(child: _ProfileHeader(student: student)),
+        SliverToBoxAdapter(
+          child: _ProfileHeader(student: student, onOpenAlert: onOpenAlert),
+        ),
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
           sliver: SliverToBoxAdapter(
@@ -193,7 +209,9 @@ class _HomeTab extends StatelessWidget {
 // ─── Profile Header ───────────────────────────────────────────────────────────
 class _ProfileHeader extends StatelessWidget {
   final StudentModel student;
-  const _ProfileHeader({required this.student});
+  final VoidCallback onOpenAlert;
+
+  const _ProfileHeader({required this.student, required this.onOpenAlert});
 
   @override
   Widget build(BuildContext context) {
@@ -239,7 +257,7 @@ class _ProfileHeader extends StatelessWidget {
                   color: Colors.white,
                   size: 26,
                 ),
-                onPressed: () {},
+                onPressed: onOpenAlert,
               ),
               Positioned(
                 right: 8,
@@ -405,7 +423,7 @@ class _ActionCard extends StatelessWidget {
   }
 }
 
-// ─── Bottom Nav (pill highlight style จาก version แรก) ────────────────────────
+// ─── Bottom Nav ────────────────────────────────────────────────────────────────
 class _BottomNav extends StatelessWidget {
   final int selectedIndex;
   final void Function(int) onTap;
@@ -448,7 +466,6 @@ class _BottomNav extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // ── pill highlight เมื่อ selected ──
                       isSelected
                           ? Container(
                               width: 48,
@@ -487,44 +504,6 @@ class _BottomNav extends StatelessWidget {
               ),
             );
           }),
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Placeholder Tab ──────────────────────────────────────────────────────────
-class _PlaceholderTab extends StatelessWidget {
-  final String label;
-  const _PlaceholderTab({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        title: Text(
-          label,
-          style: AppTextStyle.h3.copyWith(color: Colors.white),
-        ),
-        elevation: 0,
-      ),
-      backgroundColor: AppColors.background,
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.construction_rounded,
-              color: AppColors.textTertiary,
-              size: 48,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Coming Soon',
-              style: AppTextStyle.h3.copyWith(color: AppColors.textTertiary),
-            ),
-          ],
         ),
       ),
     );

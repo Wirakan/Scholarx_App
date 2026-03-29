@@ -160,10 +160,10 @@ class _StatsRow extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
           child: _StatCard(
-            label: 'รอดำเนินการ',
+            label: 'กำลังพิจารณา',
             value: '1',
-            icon: Icons.hourglass_empty_rounded,
-            color: AppColors.warning,
+            icon: Icons.assignment_outlined,
+            color: const Color(0xFFE07A5F),
           ),
         ),
       ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '/student/models/notification_model.dart';
+import '/shared/application_repository.dart';
 
 class NotificationDetailScreen extends StatelessWidget {
   final NotificationModel notification;
@@ -11,11 +12,36 @@ class NotificationDetailScreen extends StatelessWidget {
     this.onBack,
   });
 
+  Color _statusColor(ApplicationStatus status) {
+    switch (status) {
+      case ApplicationStatus.pending:
+        return const Color(0xFFFF6B35);
+      case ApplicationStatus.reviewing:
+        return const Color(0xFFFF6B35);
+      case ApplicationStatus.approved:
+        return Colors.green;
+      case ApplicationStatus.rejected:
+        return Colors.red;
+    }
+  }
+
+  IconData _statusIcon(ApplicationStatus status) {
+    switch (status) {
+      case ApplicationStatus.pending:
+        return Icons.assignment_outlined;
+      case ApplicationStatus.reviewing:
+        return Icons.assignment_outlined;
+      case ApplicationStatus.approved:
+        return Icons.check_circle_outline_rounded;
+      case ApplicationStatus.rejected:
+        return Icons.cancel_outlined;
+    }
+  }
+
   String _formatTime(DateTime dt) {
     final now = DateTime.now();
-    final isToday = dt.year == now.year &&
-        dt.month == now.month &&
-        dt.day == now.day;
+    final isToday =
+        dt.year == now.year && dt.month == now.month && dt.day == now.day;
 
     final hour = dt.hour.toString().padLeft(2, '0');
     final minute = dt.minute.toString().padLeft(2, '0');
@@ -23,16 +49,18 @@ class NotificationDetailScreen extends StatelessWidget {
     if (isToday) {
       return 'ส่งวันนี้ เวลา $hour:$minute น.';
     } else {
-      return 'ส่งเมื่อ ${dt.day}/${dt.month}/${dt.year} เวลา $hour:$minute น.';
+      return 'ส่งเมื่อ ${dt.day}/${dt.month}/${dt.year + 543} เวลา $hour:$minute น.';
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final color = _statusColor(notification.status);
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: _buildAppBar(context),
-      body: _buildBody(context),
+      body: _buildBody(context, color),
     );
   }
 
@@ -53,7 +81,7 @@ class NotificationDetailScreen extends StatelessWidget {
         onPressed: onBack ?? () => Navigator.pop(context),
       ),
       title: const Text(
-        'รายละเอียดแจ้งเตือน',
+        'รายละเอียดการแจ้งเตือน',
         style: TextStyle(
           color: Colors.white,
           fontSize: 18,
@@ -65,7 +93,7 @@ class NotificationDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBody(BuildContext context) {
+  Widget _buildBody(BuildContext context, Color color) {
     return Column(
       children: [
         Expanded(
@@ -73,13 +101,13 @@ class NotificationDetailScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
             child: Column(
               children: [
-                _buildIcon(),
+                _buildIcon(color),
                 const SizedBox(height: 20),
                 _buildTitle(),
                 const SizedBox(height: 8),
                 _buildTimestamp(),
                 const SizedBox(height: 24),
-                _buildContentCard(),
+                _buildContentCard(color),
               ],
             ),
           ),
@@ -89,19 +117,15 @@ class NotificationDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildIcon() {
+  Widget _buildIcon(Color color) {
     return Container(
       width: 88,
       height: 88,
       decoration: BoxDecoration(
-        color: notification.iconColor.withOpacity(0.15),
+        color: color.withOpacity(0.15),
         shape: BoxShape.circle,
       ),
-      child: Icon(
-        notification.icon,
-        size: 44,
-        color: notification.iconColor,
-      ),
+      child: Icon(_statusIcon(notification.status), size: 44, color: color),
     );
   }
 
@@ -120,14 +144,12 @@ class NotificationDetailScreen extends StatelessWidget {
   Widget _buildTimestamp() {
     return Text(
       _formatTime(notification.createdAt),
-      style: const TextStyle(
-        fontSize: 13,
-        color: Color(0xFF9E9E9E),
-      ),
+      style: const TextStyle(fontSize: 13, color: Color(0xFF9E9E9E)),
+      textAlign: TextAlign.center,
     );
   }
 
-  Widget _buildContentCard() {
+  Widget _buildContentCard(Color color) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -142,13 +164,60 @@ class NotificationDetailScreen extends StatelessWidget {
           ),
         ],
       ),
-      child: Text(
-        notification.body,
-        style: const TextStyle(
-          fontSize: 15,
-          color: Color(0xFF424242),
-          height: 1.7,
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionLabel('สถานะ'),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.10),
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: Text(
+              notification.statusLabel,
+              style: TextStyle(
+                color: color,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          _buildSectionLabel('ชื่อทุน'),
+          const SizedBox(height: 6),
+          Text(
+            notification.scholarshipName,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF424242),
+            ),
+          ),
+          const SizedBox(height: 20),
+          _buildSectionLabel('รายละเอียด'),
+          const SizedBox(height: 6),
+          Text(
+            notification.message,
+            style: const TextStyle(
+              fontSize: 15,
+              color: Color(0xFF424242),
+              height: 1.7,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionLabel(String label) {
+    return Text(
+      label,
+      style: const TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.w600,
+        color: Color(0xFF9E9E9E),
       ),
     );
   }
@@ -161,9 +230,7 @@ class NotificationDetailScreen extends StatelessWidget {
         width: double.infinity,
         height: 52,
         child: ElevatedButton.icon(
-          onPressed: () {
-            // TODO: navigate to application history
-          },
+        onPressed: () {},
           icon: const Icon(Icons.history, color: Colors.white),
           label: const Text(
             'ดูประวัติใบสมัคร',
@@ -184,4 +251,31 @@ class NotificationDetailScreen extends StatelessWidget {
       ),
     );
   }
+}
+Widget _buildBottomButton(BuildContext context) {
+  return Container(
+    color: const Color(0xFFF5F5F5),
+    padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+    child: SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: ElevatedButton.icon(
+        onPressed: null,
+        icon: const Icon(Icons.history),
+        label: const Text(
+          'ดูประวัติใบสมัคร',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFFFF6B35),
+          disabledBackgroundColor: const Color(0xFFFF6B35),
+          disabledForegroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+          elevation: 0,
+        ),
+      ),
+    ),
+  );
 }

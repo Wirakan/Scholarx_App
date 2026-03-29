@@ -389,15 +389,15 @@ class AppBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const items = [
-      _NavDef(Icons.home_rounded, Icons.home_outlined, 'Home'),
-      _NavDef(Icons.school_rounded, Icons.school_outlined, 'Scholar'),
-      _NavDef(Icons.fact_check_rounded, Icons.fact_check_outlined, 'Tracking'),
+      _NavDef(Icons.home_rounded, Icons.home_outlined, 'หน้าแรก'),
+      _NavDef(Icons.school_rounded, Icons.school_outlined, 'ทุน'),
+      _NavDef(Icons.fact_check_rounded, Icons.fact_check_outlined, 'ติดตาม'),
       _NavDef(
         Icons.notifications_rounded,
         Icons.notifications_outlined,
-        'Alerts',
+        'แจ้งเตือน',
       ),
-      _NavDef(Icons.person_rounded, Icons.person_outlined, 'Profile'),
+      _NavDef(Icons.person_rounded, Icons.person_outlined, 'บัญชีผู้ใช้'),
     ];
 
     return Container(
