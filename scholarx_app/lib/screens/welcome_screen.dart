@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/scholarx_logo.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -8,7 +9,6 @@ class WelcomeScreen extends StatefulWidget {
 }
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
-  // ── Design tokens ──
   static const Color primaryOrange = Color(0xFFFF6B1A);
   static const Color lightOrange = Color(0xFFFFB347);
   static const Color darkOrange = Color(0xFFD94A00);
@@ -28,25 +28,35 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     }
   }
 
-  // ── Hero gradient based on selected role ──
-  LinearGradient get _heroGradient {
+LinearGradient get _heroGradient {
     if (_selectedRole == 'admin') {
       return const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [lightPurple, primaryPurple, darkPurple],
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Color(0xFF5A189A), // ม่วงเข้มมาก (top shadow)
+          Color(0xFF7B2CBF), // ม่วงเข้ม
+          Color(0xFF9D4EDD), // ⭐ primary
+          Color(0xFFBA8CFF), // ม่วงกลาง
+          Color(0xFFD8B4FE), // ม่วงอ่อน
+          Colors.white,
+        ],
+        stops: [0.0, 0.30, 0.52, 0.68, 0.82, 0.93],
       );
     }
-    return const LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: [lightOrange, primaryOrange, darkOrange],
+return const LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        Color(0xFFFF6B1A), // ส้มสว่าง top
+        Color(0xFFFF6B1A), // ส้มหลัก
+        Color.fromARGB(255, 255, 153, 98), // ส้มกลาง (ไม่เข้มมาก)
+        Color(0xFFFFCCA0), // ส้มอ่อนนวล
+        Color(0xFFFFE8D5), // ส้มครีมอ่อน
+        Colors.white,
+      ],
+      stops: [0.0, 0.28, 0.48, 0.65, 0.80, 0.93],
     );
-  }
-
-  Color get _heroIconColor {
-    if (_selectedRole == 'admin') return primaryPurple;
-    return primaryOrange;
   }
 
   @override
@@ -60,21 +70,16 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 24),
-                  _buildTitle(),
                   const SizedBox(height: 28),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: const Text(
-                      'เลือกบทบาท',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.grey,
-                        letterSpacing: 1.0,
-                      ),
+                  const Text(
+                    'เลือกบทบาท',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.grey,
+                      letterSpacing: 1.0,
                     ),
                   ),
                   const SizedBox(height: 14),
@@ -102,7 +107,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       colors: [lightPurple, primaryPurple, darkPurple],
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 28),
                 ],
               ),
             ),
@@ -113,63 +118,78 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     );
   }
 
-  // ── Hero Section (animated gradient) ──
+  // ── Hero: โลโก้ + "ฉันคือ...." + subtitle ทั้งหมดอยู่กึ่งกลาง ────────
   Widget _buildHeroSection() {
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 400),
       curve: Curves.easeInOut,
-      height: 280,
       width: double.infinity,
+      height: screenHeight * 0.42,
       decoration: BoxDecoration(gradient: _heroGradient),
       child: Stack(
         children: [
           Positioned(top: -40, right: -30, child: _buildDecorativeCircle(180)),
-          Positioned(bottom: 20, left: -20, child: _buildDecorativeCircle(100)),
-          Center(
+          Positioned(
+            bottom: -10,
+            left: -20,
+            child: _buildDecorativeCircle(100),
+          ),
+
+          // ── Logo อยู่บนสุด ──
+          SafeArea(
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 24),
+                child: ScholarXLogo(size: 72, withLabel: false),
+              ),
+            ),
+          ),
+
+          // ── "ฉันคือ...." + subtitle อยู่ล่างติดขอบ hero ──
+          Positioned(
+            left: 28,
+            right: 28,
+            bottom: 28,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(height: 40),
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 400),
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(18),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.15),
-                        blurRadius: 16,
-                        offset: const Offset(0, 4),
+RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.5,
+                      color: Color(0xFF222222),
+                    ),
+                    children: [
+                      const TextSpan(text: 'ฉันคือ'),
+TextSpan(
+                        text: '....',
+                        style: TextStyle(
+                          color: _selectedRole == 'admin'
+                              ? primaryPurple
+                              : _selectedRole == 'student'
+                              ? primaryOrange
+                              : Colors.black.withOpacity(0.4),
+                        ),
                       ),
                     ],
                   ),
-                  child: Icon(
-                    _selectedRole == 'admin'
-                        ? Icons.shield_rounded
-                        : Icons.school_rounded,
-                    color: _heroIconColor,
-                    size: 36,
-                  ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 6),
                 const Text(
-                  'ScholarX',
+                  'เลือกบทบาทของคุณเพื่อใช้งานระบบ',
+                  textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-                const Text(
-                  'FOR EN STUDENT',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 2,
+                    fontSize: 14,
+                    color: Color(0xFF444444), // ดำอ่อนสวย,
+                    fontWeight: FontWeight.w500,
+                    height: 1.4,
                   ),
                 ),
               ],
@@ -186,47 +206,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.white.withOpacity(0.12),
+        color: Colors.white.withOpacity(0.10),
       ),
     );
   }
 
-  Widget _buildTitle() {
-    return Column(
-      children: [
-        RichText(
-          textAlign: TextAlign.center,
-          text: const TextSpan(
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.w900,
-              color: Color(0xFF1A1A1A),
-            ),
-            children: [
-              TextSpan(text: 'ฉันคือ'),
-              TextSpan(
-                text: '...',
-                style: TextStyle(color: primaryOrange),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 8),
-        const Text(
-          'เลือกบทบาทของคุณเพื่อใช้งานระบบ',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 13.5,
-            color: Colors.grey,
-            fontWeight: FontWeight.w600,
-            height: 1.5,
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ── Role Card with gradient support ──
   Widget _buildRoleCard({
     required String roleKey,
     required IconData icon,
@@ -329,7 +313,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     );
   }
 
-  // ── Continue Button ──
   Widget _buildContinueButton() {
     final bool enabled = _selectedRole != null;
     return Container(
@@ -350,8 +333,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         child: ElevatedButton(
           onPressed: enabled ? _onContinue : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: enabled ? Colors.black : Colors.grey.shade300,
+            backgroundColor: Colors.black, // 👈 ดำตลอด
+            disabledBackgroundColor: Colors.black, // 👈 ตอน disabled ก็ยังดำ
             foregroundColor: Colors.white,
+            disabledForegroundColor: Colors.white70,
             elevation: enabled ? 4 : 0,
             shadowColor: Colors.black.withOpacity(0.4),
             shape: RoundedRectangleBorder(
