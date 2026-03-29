@@ -3,7 +3,7 @@ import '/coreApp/themeApp/app_colors.dart';
 import '/coreApp/themeApp/app_text_style.dart';
 import '/coreApp/widgets/scholarship_form_widget.dart';
 import '/shared/application_repository.dart';
-import '/student/screens/tracking/tracking_screen.dart';
+import '/student/screens/home/student_home_screen.dart';
 
 /// หน้าสำเร็จ — รับ [record] ที่ถูก submit มาจาก Step 5
 class ScholarshipFormSuccess extends StatelessWidget {
@@ -59,7 +59,6 @@ class ScholarshipFormSuccess extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
 
-                    // ── Application details card ──
                     Container(
                       width: double.infinity,
                       decoration: BoxDecoration(
@@ -108,7 +107,6 @@ class ScholarshipFormSuccess extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
 
-                    // ── Notice banner ──
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(14),
@@ -141,7 +139,6 @@ class ScholarshipFormSuccess extends StatelessWidget {
                     ),
                     const SizedBox(height: 28),
 
-                    // ── ติดตามทุน ──
                     SizedBox(
                       width: double.infinity,
                       height: 50,
@@ -150,9 +147,10 @@ class ScholarshipFormSuccess extends StatelessWidget {
                           Navigator.pushAndRemoveUntil(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => const TrackingScreen(),
+                              builder: (_) =>
+                                  const StudentHomeScreen(initialIndex: 2),
                             ),
-                            (route) => route.isFirst,
+                            (route) => false,
                           );
                         },
                         icon: const Icon(Icons.receipt_long_outlined, size: 18),
@@ -173,13 +171,19 @@ class ScholarshipFormSuccess extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
 
-                    // ── กลับหน้าหลัก ──
                     SizedBox(
                       width: double.infinity,
                       height: 50,
                       child: OutlinedButton.icon(
                         onPressed: () {
-                          Navigator.of(context).popUntil((r) => r.isFirst);
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  const StudentHomeScreen(initialIndex: 0),
+                            ),
+                            (route) => false,
+                          );
                         },
                         icon: const Icon(Icons.home_outlined, size: 18),
                         label: const Text('กลับหน้าหลัก'),
@@ -202,7 +206,6 @@ class ScholarshipFormSuccess extends StatelessWidget {
               ),
             ),
           ),
-          const AppBottomNavBar(activeIndex: 1),
         ],
       ),
     );
@@ -219,6 +222,7 @@ class ScholarshipFormSuccess extends StatelessWidget {
 class _InfoRow extends StatelessWidget {
   final String label;
   final String value;
+
   const _InfoRow(this.label, this.value);
 
   @override

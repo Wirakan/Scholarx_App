@@ -3,6 +3,8 @@ import '/shared/application_repository.dart';
 import '/student/models/student_model.dart';
 import '/student/models/notification_model.dart';
 import 'notification_detail_screen.dart';
+import '/coreApp/themeApp/app_colors.dart';
+import '/coreApp/themeApp/app_text_style.dart';
 
 class NotificationScreen extends StatefulWidget {
   final void Function(NotificationModel)? onOpenDetail;
@@ -208,43 +210,61 @@ class _NotificationScreenState extends State<NotificationScreen> {
     );
   }
 
-  Widget _buildTabs() {
+Widget _buildTabs() {
     const labels = ['ทั้งหมด', 'ข้อความ', 'กิจกรรม'];
 
     return Container(
+      width: double.infinity,
       color: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        children: List.generate(labels.length, (index) {
-          final selected = _selectedTab == index;
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: List.generate(labels.length, (index) {
+            final selected = _selectedTab == index;
 
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                _selectedTab = index;
-              });
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              margin: const EdgeInsets.only(right: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-              decoration: BoxDecoration(
-                color: selected
-                    ? const Color(0xFFFF5722)
-                    : const Color(0xFFF0F0F0),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                labels[index],
-                style: TextStyle(
-                  color: selected ? Colors.white : Colors.black87,
-                  fontWeight: FontWeight.w500,
-                  fontSize: 14,
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedTab = index;
+                  });
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: selected
+                        ? const Color(0xFFEB591A)
+                        : Colors.transparent,
+                    border: Border.all(
+                      color: selected
+                          ? const Color(0xFFEB591A)
+                          : const Color(0xFFE0E0E0),
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    labels[index],
+                    style:
+                        const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ).copyWith(
+                          color: selected
+                              ? Colors.white
+                              : const Color(0xFF757575),
+                        ),
+                  ),
                 ),
               ),
-            ),
-          );
-        }),
+            );
+          }),
+        ),
       ),
     );
   }
