@@ -6,6 +6,7 @@ import '/features/components/student_card.dart';
 import '/features/student/models/student_model.dart';
 import '/features/student/screens/profile/student_profile_screen.dart';
 import '/features/student/screens/scholar/scholar_screen.dart';
+import '/features/student/screens/notification/notification_screen.dart';
 
 // features/student/screens/home/student_home_screen.dart
 // แก้ไขจากเดิม: เพิ่ม import ScholarScreen + เปลี่ยน _PlaceholderTab ของ Scholar + onTap ของ action card
@@ -63,7 +64,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
           ),
           const ScholarScreen(), // ← เปลี่ยนจาก _PlaceholderTab เป็น ScholarScreen
           const _PlaceholderTab(label: 'Document'),
-          const _PlaceholderTab(label: 'Notification'),
+          const NotificationScreen(),
           StudentProfileScreen(student: _student),
         ],
       ),
