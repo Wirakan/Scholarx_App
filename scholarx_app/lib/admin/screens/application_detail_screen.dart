@@ -2,15 +2,16 @@ import 'package:flutter/material.dart';
 import '../core/colors.dart';
 import '../core/text_styles.dart';
 import '../core/models.dart';
-import '../widgets/sx_app_bar.dart';
 import 'confirm_sheet.dart';
+import '/screens/splash_screen.dart';
 
 class ApplicationDetailScreen extends StatefulWidget {
   final Applicant applicant;
   const ApplicationDetailScreen({super.key, required this.applicant});
 
   @override
-  State<ApplicationDetailScreen> createState() => _ApplicationDetailScreenState();
+  State<ApplicationDetailScreen> createState() =>
+      _ApplicationDetailScreenState();
 }
 
 class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
@@ -26,25 +27,161 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
 
   Color get _statusColor {
     switch (_currentStatus) {
-      case 'รอพิจารณา': return SXColor.warning;
-      case 'กำลังพิจารณา': return const Color(0xFF60A5FA);
-      default: return SXColor.textSecondary;
+      case 'รอพิจารณา':
+        return SXColor.warning;
+      case 'กำลังพิจารณา':
+        return const Color(0xFF60A5FA);
+      default:
+        return SXColor.textSecondary;
     }
   }
 
   Color get _statusBg {
     switch (_currentStatus) {
-      case 'รอพิจารณา': return SXColor.warningBg;
-      case 'กำลังพิจารณา': return const Color(0xFFEFF6FF);
-      default: return SXColor.neutralBg;
+      case 'รอพิจารณา':
+        return SXColor.warningBg;
+      case 'กำลังพิจารณา':
+        return const Color(0xFFEFF6FF);
+      default:
+        return SXColor.neutralBg;
     }
+  }
+
+  void _showMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ListTile(
+              leading: const Icon(
+                Icons.logout_rounded,
+                color: Colors.redAccent,
+              ),
+              title: const Text(
+                'ออกจากระบบ',
+                style: TextStyle(
+                  color: Colors.redAccent,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (_, __, ___) => const SplashScreen(),
+                    transitionsBuilder: (_, anim, __, child) =>
+                        FadeTransition(opacity: anim, child: child),
+                    transitionDuration: const Duration(milliseconds: 600),
+                  ),
+                  (route) => false,
+                );
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showStatusPicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: SXColor.border,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text('เปลี่ยนสถานะ', style: SXText.sectionHeader),
+            const SizedBox(height: 12),
+            ..._statusOptions.map(
+              (s) => ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(
+                  s,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: s == _currentStatus
+                        ? SXColor.primary
+                        : SXColor.textPrimary,
+                  ),
+                ),
+                trailing: s == _currentStatus
+                    ? Icon(Icons.check, color: SXColor.primary, size: 18)
+                    : null,
+                onTap: () {
+                  setState(() => _currentStatus = s);
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final a = widget.applicant;
     return Scaffold(
-      appBar: const SXAppBar(title: 'การจัดการใบสมัคร', showBack: true),
+      appBar: AppBar(
+        backgroundColor: SXColor.primary,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'การจัดการใบสมัคร',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+            fontSize: 18,
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.menu_rounded, color: Colors.white),
+            onPressed: () => _showMenu(context),
+          ),
+        ],
+      ),
       backgroundColor: SXColor.background,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -57,7 +194,13 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
               decoration: BoxDecoration(
                 color: SXColor.surface,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2))],
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,20 +210,33 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text('ข้อมูลผู้สมัคร', style: SXText.sectionHeader),
-                      // Status dropdown
                       GestureDetector(
                         onTap: () => _showStatusPicker(context),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
                             color: _statusBg,
                             borderRadius: BorderRadius.circular(999),
                           ),
                           child: Row(
                             children: [
-                              Text(_currentStatus, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: _statusColor)),
+                              Text(
+                                _currentStatus,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: _statusColor,
+                                ),
+                              ),
                               const SizedBox(width: 4),
-                              Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: _statusColor),
+                              Icon(
+                                Icons.keyboard_arrow_down_rounded,
+                                size: 16,
+                                color: _statusColor,
+                              ),
                             ],
                           ),
                         ),
@@ -97,20 +253,35 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                         backgroundColor: SXColor.primaryBg,
                         child: Text(
                           a.name[0],
-                          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: SXColor.primary),
+                          style: const TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w700,
+                            color: SXColor.primary,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 14),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(a.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: SXColor.textPrimary)),
+                          Text(
+                            a.name,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: SXColor.textPrimary,
+                            ),
+                          ),
                           const SizedBox(height: 2),
                           Text(a.studentId, style: SXText.caption),
                           const SizedBox(height: 4),
                           Row(
                             children: [
-                              const Icon(Icons.email_outlined, size: 13, color: SXColor.textSecondary),
+                              const Icon(
+                                Icons.email_outlined,
+                                size: 13,
+                                color: SXColor.textSecondary,
+                              ),
                               const SizedBox(width: 4),
                               Text(a.email, style: SXText.caption),
                             ],
@@ -154,7 +325,14 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                 children: [
                   const Text('ทุนที่สมัคร', style: SXText.caption),
                   const SizedBox(height: 4),
-                  Text(a.scholarship, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: SXColor.primary)),
+                  Text(
+                    a.scholarship,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: SXColor.primary,
+                    ),
+                  ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
@@ -191,7 +369,13 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
         decoration: BoxDecoration(
           color: SXColor.surface,
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 16, offset: const Offset(0, -4))],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 16,
+              offset: const Offset(0, -4),
+            ),
+          ],
         ),
         child: Row(
           children: [
@@ -205,8 +389,13 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                   foregroundColor: Colors.white,
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  textStyle: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ),
@@ -222,49 +411,16 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                   foregroundColor: Colors.white,
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  textStyle: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showStatusPicker(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (_) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40, height: 4,
-                decoration: BoxDecoration(color: SXColor.border, borderRadius: BorderRadius.circular(999)),
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text('เปลี่ยนสถานะ', style: SXText.sectionHeader),
-            const SizedBox(height: 12),
-            ..._statusOptions.map((s) => ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(s, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: s == _currentStatus ? SXColor.primary : SXColor.textPrimary)),
-              trailing: s == _currentStatus ? Icon(Icons.check, color: SXColor.primary, size: 18) : null,
-              onTap: () {
-                setState(() => _currentStatus = s);
-                Navigator.pop(context);
-              },
-            )),
           ],
         ),
       ),
@@ -306,7 +462,13 @@ class _SectionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: SXColor.surface,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -336,7 +498,11 @@ class _DocRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.insert_drive_file_outlined, size: 16, color: SXColor.textSecondary),
+          const Icon(
+            Icons.insert_drive_file_outlined,
+            size: 16,
+            color: SXColor.textSecondary,
+          ),
           const SizedBox(width: 8),
           Expanded(child: Text(name, style: SXText.body)),
           const Icon(Icons.download_outlined, size: 18, color: SXColor.primary),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '/coreApp/themeApp/app_colors.dart';
 import '/student/models/scholarship_model.dart';
 import '/student/screens/form/scholarship_form_step1.dart';
 
@@ -150,7 +151,7 @@ class ScholarshipDetailScreen extends StatelessWidget {
               height: 52,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF5722),
+                  backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -172,8 +173,6 @@ class ScholarshipDetailScreen extends StatelessWidget {
               ),
             ),
           ),
-
-          const _BottomNavBar(),
         ],
       ),
     );
@@ -264,7 +263,7 @@ class _CheckItem extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.check_circle, color: Color(0xFFFF5722), size: 20),
+          Icon(Icons.check_circle, color: AppColors.primary, size: 20),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
@@ -274,63 +273,6 @@ class _CheckItem extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────
-//  BOTTOM NAV BAR
-// ─────────────────────────────────────────────
-class _BottomNavBar extends StatelessWidget {
-  const _BottomNavBar();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Color(0xFFEEEEEE))),
-      ),
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: const [
-          _NavItem(icon: Icons.home_outlined, label: 'Home'),
-          _NavItem(
-            icon: Icons.school_outlined,
-            label: 'Scholar',
-            isActive: true,
-          ),
-          _NavItem(icon: Icons.description_outlined, label: 'Tracking'),
-          _NavItem(icon: Icons.notifications_outlined, label: 'Alert'),
-          _NavItem(icon: Icons.person_outline, label: 'Profile'),
-        ],
-      ),
-    );
-  }
-}
-
-class _NavItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool isActive;
-
-  const _NavItem({
-    required this.icon,
-    required this.label,
-    this.isActive = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final color = isActive ? const Color(0xFFFF5722) : Colors.grey;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, color: color, size: 24),
-        const SizedBox(height: 4),
-        Text(label, style: TextStyle(color: color, fontSize: 11)),
-      ],
     );
   }
 }
