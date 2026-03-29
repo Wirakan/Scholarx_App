@@ -7,8 +7,11 @@
 //   1. ครอบ MaterialApp ด้วย ChangeNotifierProvider<ApplicationStore>
 //   2. อ่านข้อมูล : context.watch<ApplicationStore>().applications
 //   3. อัพเดท    : context.read<ApplicationStore>().updateStatus(id, newStatus)
+//   4. Logout    : context.read<ApplicationStore>().showLogoutMenu(context)
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import '/screens/splash_screen.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  STATUS ENUM  (ใช้ร่วมกันทั้ง admin และ student)
@@ -117,11 +120,10 @@ class ApplicationModel {
 // ─────────────────────────────────────────────────────────────────────────────
 class ApplicationStore extends ChangeNotifier {
   // ── Mock data ──────────────────────────────────────────────────────────────
-  // ข้อมูลตัวอย่างที่ครอบคลุมทั้ง admin list และ student tracking
   final List<ApplicationModel> _applications = [
     ApplicationModel(
       id: 'AP011001',
-      studentId: 'usr_001', // ← ต้องตรงกับ StudentModel.id
+      studentId: 'usr_001',
       studentName: 'ธนวัตน์ ประเสริฐ',
       email: 'thanawat@kkumail.com',
       faculty: 'วิศวกรรมศาสตร์',
@@ -171,7 +173,6 @@ class ApplicationStore extends ChangeNotifier {
       reason: 'ต้องการโอกาสทางการศึกษาเพื่อพัฒนาตนเองและสังคม',
       status: ApplicationStatus.approved,
     ),
-    // ── ใบสมัครของนักศึกษาคนอื่น (admin เห็น, student นี้ไม่เห็น) ──────────
     ApplicationModel(
       id: 'AP011005',
       studentId: 'usr_002',
@@ -234,7 +235,7 @@ class ApplicationStore extends ChangeNotifier {
     final index = _applications.indexWhere((a) => a.id == applicationId);
     if (index == -1) return;
     _applications[index] = _applications[index].copyWithStatus(newStatus);
-    notifyListeners(); // ← ทำให้ทุก widget ที่ watch store นี้ rebuild
+    notifyListeners();
   }
 
   /// เพิ่มใบสมัครใหม่ (เมื่อ student กดสมัครทุน)
@@ -251,4 +252,68 @@ class ApplicationStore extends ChangeNotifier {
   }
 
   int get totalCount => _applications.length;
+
+  // ── Logout ─────────────────────────────────────────────────────────────────
+
+  /// แสดง Bottom Sheet เมนู logout เหมือน DashboardScreen
+  /// ใช้งาน: context.read<ApplicationStore>().showLogoutMenu(context)
+  void showLogoutMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ListTile(
+              leading: const Icon(
+                Icons.logout_rounded,
+                color: Colors.redAccent,
+              ),
+              title: const Text(
+                'ออกจากระบบ',
+                style: TextStyle(
+                  color: Colors.redAccent,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(context); // ปิด bottom sheet ก่อน
+                logout(context);
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// นำทางกลับ SplashScreen พร้อมล้าง navigation stack ทั้งหมด
+  /// เรียกตรงก็ได้ถ้าไม่ต้องการ bottom sheet
+  void logout(BuildContext context) {
+    Navigator.pushAndRemoveUntil(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (_, __, ___) => const SplashScreen(),
+        transitionsBuilder: (_, anim, __, child) =>
+            FadeTransition(opacity: anim, child: child),
+        transitionDuration: const Duration(milliseconds: 600),
+      ),
+      (route) => false, // ล้าง stack ทั้งหมด
+    );
+  }
 }
