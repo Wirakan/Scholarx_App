@@ -1,14 +1,24 @@
+// การเปลี่ยนแปลงจากของเดิม:
+//   - เพิ่ม import provider
+//   - เรียก provider.addStatusNotification() ก่อน Navigator.pop
+
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../core/colors.dart';
 import '../core/text_styles.dart';
 import '../core/models.dart';
+import '/student/providers/notification_provider.dart';
+import '/student/models/notification_model.dart';
 
 void showApproveSheet(BuildContext context, Applicant applicant) {
   showModalBottomSheet(
     context: context,
     backgroundColor: Colors.transparent,
     isScrollControlled: true,
-    builder: (_) => ConfirmSheet(applicant: applicant, isApprove: true),
+    builder: (_) => ChangeNotifierProvider.value(
+      value: context.read<NotificationProvider>(),
+      child: ConfirmSheet(applicant: applicant, isApprove: true),
+    ),
   );
 }
 
@@ -17,7 +27,10 @@ void showRejectSheet(BuildContext context, Applicant applicant) {
     context: context,
     backgroundColor: Colors.transparent,
     isScrollControlled: true,
-    builder: (_) => ConfirmSheet(applicant: applicant, isApprove: false),
+    builder: (_) => ChangeNotifierProvider.value(
+      value: context.read<NotificationProvider>(),
+      child: ConfirmSheet(applicant: applicant, isApprove: false),
+    ),
   );
 }
 
@@ -25,14 +38,18 @@ class ConfirmSheet extends StatelessWidget {
   final Applicant applicant;
   final bool isApprove;
 
-  const ConfirmSheet({super.key, required this.applicant, required this.isApprove});
+  const ConfirmSheet({
+    super.key,
+    required this.applicant,
+    required this.isApprove,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final color = isApprove ? SXColor.success : SXColor.error;
+    final color   = isApprove ? SXColor.success : SXColor.error;
     final bgColor = isApprove ? SXColor.successBg : SXColor.errorBg;
-    final icon = isApprove ? Icons.check_rounded : Icons.close_rounded;
-    final title = isApprove ? 'ยืนยันการอนุมัติ' : 'ยืนยันการปฏิเสธ';
+    final icon    = isApprove ? Icons.check_rounded : Icons.close_rounded;
+    final title   = isApprove ? 'ยืนยันการอนุมัติ' : 'ยืนยันการปฏิเสธ';
     final subtitle = isApprove
         ? 'คุณแน่ใจหรือไม่ว่าต้องการอนุมัติใบสมัครนี้?\nการดำเนินการนี้ไม่สามารถแก้ไขได้'
         : 'คุณแน่ใจหรือไม่ว่าต้องการปฏิเสธใบสมัครนี้?\nการดำเนินการนี้ไม่สามารถแก้ไขได้';
@@ -47,30 +64,42 @@ class ConfirmSheet extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Handle
+          // Handle bar
           Container(
             width: 40,
             height: 4,
-            decoration: BoxDecoration(color: SXColor.border, borderRadius: BorderRadius.circular(999)),
+            decoration: BoxDecoration(
+              color: SXColor.border,
+              borderRadius: BorderRadius.circular(999),
+            ),
           ),
           const SizedBox(height: 24),
+
           // Icon
           Container(
             width: 56,
             height: 56,
-            decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(16)),
+            decoration: BoxDecoration(
+              color: bgColor,
+              borderRadius: BorderRadius.circular(16),
+            ),
             child: Icon(icon, color: color, size: 28),
           ),
           const SizedBox(height: 16),
+
           Text(title, style: SXText.sectionHeader.copyWith(fontSize: 18)),
           const SizedBox(height: 8),
           Text(
             subtitle,
             textAlign: TextAlign.center,
-            style: SXText.body.copyWith(color: SXColor.textSecondary, height: 1.5),
+            style: SXText.body.copyWith(
+              color: SXColor.textSecondary,
+              height: 1.5,
+            ),
           ),
           const SizedBox(height: 20),
-          // Applicant card
+
+          // Applicant preview card
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -85,7 +114,10 @@ class ConfirmSheet extends StatelessWidget {
                   backgroundColor: SXColor.primary,
                   child: Text(
                     applicant.name[0],
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -106,6 +138,8 @@ class ConfirmSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
+
+          // Action buttons
           Row(
             children: [
               Expanded(
@@ -113,12 +147,18 @@ class ConfirmSheet extends StatelessWidget {
                   onPressed: () => Navigator.pop(context),
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: SXColor.border),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   child: const Text(
                     'ยกเลิก',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: SXColor.textSecondary),
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: SXColor.textSecondary,
+                    ),
                   ),
                 ),
               ),
@@ -127,14 +167,30 @@ class ConfirmSheet extends StatelessWidget {
                 flex: 2,
                 child: ElevatedButton.icon(
                   onPressed: () {
-                    Navigator.pop(context);
-                    Navigator.pop(context);
+                    // ── ส่ง notification ไปยัง student ──────────────────────
+                    context.read<NotificationProvider>().addStatusNotification(
+                          scholarshipName: applicant.scholarship,
+                          status: isApprove
+                              ? ApplicationStatus.approved
+                              : ApplicationStatus.rejected,
+                        );
+
+                    // ── ปิด sheet + กลับจากหน้า detail ──────────────────────
+                    Navigator.pop(context); // ปิด sheet
+                    Navigator.pop(context); // กลับจาก detail screen
+
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text(isApprove ? 'อนุมัติใบสมัครสำเร็จ' : 'ปฏิเสธใบสมัครสำเร็จ'),
+                        content: Text(
+                          isApprove
+                              ? 'อนุมัติใบสมัครสำเร็จ'
+                              : 'ปฏิเสธใบสมัครสำเร็จ',
+                        ),
                         backgroundColor: color,
                         behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                     );
                   },
@@ -144,9 +200,14 @@ class ConfirmSheet extends StatelessWidget {
                     backgroundColor: color,
                     foregroundColor: Colors.white,
                     elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                    textStyle: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ),

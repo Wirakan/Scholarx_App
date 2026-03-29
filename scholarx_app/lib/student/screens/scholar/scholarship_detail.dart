@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import '/student/models/scholarship_model.dart';
+import '/student/screens/form/scholarship_form_step1.dart';
 
 class ScholarshipDetailScreen extends StatelessWidget {
-  const ScholarshipDetailScreen({super.key});
+  final ScholarshipModel scholarship;
+
+  const ScholarshipDetailScreen({super.key, required this.scholarship});
 
   @override
   Widget build(BuildContext context) {
@@ -21,26 +25,30 @@ class ScholarshipDetailScreen extends StatelessWidget {
               constraints: const BoxConstraints(),
             ),
             const SizedBox(width: 16),
-            const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'ทุนด้านเทคโนโลยีดิจิทัล',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    scholarship.title,
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                Text(
-                  'ทุนเฉพาะทาง Digital / IT / Engineering',
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 14,
-                    fontWeight: FontWeight.normal,
+                  Text(
+                    scholarship.categoryLabel,
+                    style: const TextStyle(
+                      color: Colors.grey,
+                      fontSize: 14,
+                      fontWeight: FontWeight.normal,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),
@@ -60,28 +68,33 @@ class ScholarshipDetailScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _DetailText('ระดับการศึกษา: ปริญญาตรี'),
+                        _DetailText(scholarship.description),
+                        const SizedBox(height: 12),
+                        const _DetailText('ระดับการศึกษา: ปริญญาตรี'),
                         const SizedBox(height: 8),
-                        _DetailText('สาขาที่เกี่ยวข้อง:'),
-                        _BulletItem('เทคโนโลยีสารสนเทศ'),
-                        _BulletItem('วิศวกรรมคอมพิวเตอร์'),
-                        _BulletItem('วิทยาการคอมพิวเตอร์'),
-                        _BulletItem('ดิจิทัลมีเดีย / AI / Data'),
+                        const _DetailText('สาขาที่เกี่ยวข้อง:'),
+                        const _BulletItem('เทคโนโลยีสารสนเทศ'),
+                        const _BulletItem('วิศวกรรมคอมพิวเตอร์'),
+                        const _BulletItem('วิทยาการคอมพิวเตอร์'),
+                        const _BulletItem('ดิจิทัลมีเดีย / AI / Data'),
                         const SizedBox(height: 8),
-                        _DetailText('สิทธิประโยชน์:'),
-                        _BulletItem(
+                        const _DetailText('สิทธิประโยชน์:'),
+                        const _BulletItem(
                           'ทุนการศึกษาสูงสุด 10,000 บาท / ปีการศึกษา',
                         ),
-                        _BulletItem('สนับสนุนค่าเรียนและอุปกรณ์ด้านเทคโนโลยี'),
-                        _BulletItem('เข้าร่วมกิจกรรมพัฒนาทักษะดิจิทัล'),
+                        const _BulletItem(
+                          'สนับสนุนค่าเรียนและอุปกรณ์ด้านเทคโนโลยี',
+                        ),
+                        const _BulletItem('เข้าร่วมกิจกรรมพัฒนาทักษะดิจิทัล'),
                         const SizedBox(height: 8),
-                        _DetailText('ระยะเวลารับสมัคร: 1 ก.พ. – 31 มี.ค. 2569'),
+                        _DetailText('เปิดรับถึง: ${scholarship.deadline}'),
                       ],
                     ),
                   ),
                   const SizedBox(height: 12),
+
                   // คุณสมบัติ
-                  _SectionCard(
+                  const _SectionCard(
                     title: 'คุณสมบัติ',
                     child: Column(
                       children: [
@@ -95,8 +108,9 @@ class ScholarshipDetailScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
+
                   // เอกสารที่ต้องใช้
-                  _SectionCard(
+                  const _SectionCard(
                     title: 'เอกสารที่ต้องใช้',
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -108,11 +122,25 @@ class ScholarshipDetailScreen extends StatelessWidget {
                       ],
                     ),
                   ),
+                  const SizedBox(height: 12),
+
+                  // อัปเดตล่าสุด
+                  _SectionCard(
+                    title: 'อัปเดตล่าสุด',
+                    child: Text(
+                      scholarship.deadline,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 16),
                 ],
               ),
             ),
           ),
+
           // ปุ่มสมัคร
           Container(
             color: Colors.white,
@@ -129,7 +157,14 @@ class ScholarshipDetailScreen extends StatelessWidget {
                   ),
                   elevation: 0,
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const ScholarshipFormStep1(),
+                    ),
+                  );
+                },
                 child: const Text(
                   'สมัครทุนนี้',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -137,14 +172,17 @@ class ScholarshipDetailScreen extends StatelessWidget {
               ),
             ),
           ),
-          // Bottom Navigation Bar
-          _BottomNavBar(),
+
+          const _BottomNavBar(),
         ],
       ),
     );
   }
 }
 
+// ─────────────────────────────────────────────
+//  SECTION CARD
+// ─────────────────────────────────────────────
 class _SectionCard extends StatelessWidget {
   final String title;
   final Widget child;
@@ -157,7 +195,7 @@ class _SectionCard extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
       ),
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -175,6 +213,9 @@ class _SectionCard extends StatelessWidget {
   }
 }
 
+// ─────────────────────────────────────────────
+//  HELPERS
+// ─────────────────────────────────────────────
 class _DetailText extends StatelessWidget {
   final String text;
   const _DetailText(this.text);
@@ -237,6 +278,9 @@ class _CheckItem extends StatelessWidget {
   }
 }
 
+// ─────────────────────────────────────────────
+//  BOTTOM NAV BAR
+// ─────────────────────────────────────────────
 class _BottomNavBar extends StatelessWidget {
   const _BottomNavBar();
 
@@ -250,9 +294,8 @@ class _BottomNavBar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
+        children: const [
           _NavItem(icon: Icons.home_outlined, label: 'Home'),
-          // consistent scholar icon across screens
           _NavItem(
             icon: Icons.school_outlined,
             label: 'Scholar',

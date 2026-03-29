@@ -94,7 +94,7 @@ class PrimaryButton extends StatelessWidget {
         height: _height,
         decoration: BoxDecoration(
           color: _bgColor,
-          borderRadius: BorderRadius.circular(999),
+          borderRadius: BorderRadius.circular(8),
           border: _border != null
               ? Border.all(color: AppColors.primary, width: 1.5)
               : null,

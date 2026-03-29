@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';                          
 import 'coreApp/themeApp/app_theme.dart';
-import 'features/student_routes.dart';
+import 'student/routes/student_routes.dart';
+import 'student/providers/notification_provider.dart';            
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  runApp(const ScholarXApp());
+  runApp(
+    ChangeNotifierProvider(                                        
+      create: (_) => NotificationProvider(),                      
+      child: const ScholarXApp(),                                  
+    ),                                                             
+  );
 }
 
 class ScholarXApp extends StatelessWidget {
