@@ -161,7 +161,7 @@ RichText(
                   textAlign: TextAlign.center,
                   text: TextSpan(
                     style: const TextStyle(
-                      fontSize: 20,
+                      fontSize: 22,
                       fontWeight: FontWeight.w800,
                       letterSpacing: -0.5,
                       color: Color(0xFF222222),
@@ -174,7 +174,7 @@ TextSpan(
                           color: _selectedRole == 'admin'
                               ? const Color.fromARGB(255, 144, 112, 201)
                               : _selectedRole == 'student'
-                              ? const Color.fromARGB(255, 163, 122, 101)
+                              ? const Color.fromARGB(255, 234, 142, 96)
                               : Colors.black.withOpacity(0.4),
                         ),
                       ),
@@ -186,8 +186,8 @@ TextSpan(
                   'เลือกบทบาทของคุณเพื่อใช้งานระบบ',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 14,
-                    color: Color.fromARGB(255, 91, 91, 91), // ดำอ่อนสวย,
+                    fontSize: 16,
+                    color: Color.fromARGB(255, 120, 120, 120), // ดำอ่อนสวย,
                     fontWeight: FontWeight.w700,
                     height: 1.4,
                   ),
