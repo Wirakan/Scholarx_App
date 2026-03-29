@@ -126,6 +126,7 @@ class _ScholarScreenState extends State<ScholarScreen> {
 
           // ── Filter Tabs ────────────────────────────────────────────
           Container(
+            width: double.infinity,
             color: AppColors.surface,
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,

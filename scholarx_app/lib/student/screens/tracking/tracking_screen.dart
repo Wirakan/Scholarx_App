@@ -134,6 +134,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
 
           // ── WHITE FILTER TABS ──
           Container(
+            width: double.infinity,
             color: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: SingleChildScrollView(
