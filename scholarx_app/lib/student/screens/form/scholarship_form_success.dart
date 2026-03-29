@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '/coreApp/themeApp/app_colors.dart';
 import '/coreApp/themeApp/app_text_style.dart';
 import '/coreApp/widgets/scholarship_form_widget.dart';
-import '/features/student/screens/tracking/tracking_screen.dart';
+import '/student/screens/tracking/tracking_screen.dart';
 
 class ScholarshipFormSuccess extends StatelessWidget {
   const ScholarshipFormSuccess({super.key});

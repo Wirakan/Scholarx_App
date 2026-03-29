@@ -5,9 +5,9 @@ import '/coreApp/themeApp/app_text_style.dart';
 // ScholarshipCardItem used by the cards is now defined in the
 // student/models package.  we re‑export it here so existing imports
 // continue to work without changes.
-import '/features/student/models/scholarship_detail_model.dart';
+import '/student/models/scholarship_detail_model.dart';
 
-export '/features/student/models/scholarship_detail_model.dart'
+export '/student/models/scholarship_detail_model.dart'
     show ScholarshipCardItem;
 
 class StudentCard extends StatelessWidget {

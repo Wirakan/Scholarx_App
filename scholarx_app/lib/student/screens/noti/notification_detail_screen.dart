@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../model/student/notification_model.dart';
+import '../../models/notification_model.dart';
 
 class NotificationDetailScreen extends StatelessWidget {
   final NotificationModel notification;

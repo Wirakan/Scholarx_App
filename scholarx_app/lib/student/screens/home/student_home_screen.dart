@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 import '/coreApp/themeApp/app_colors.dart';
 import '/coreApp/themeApp/app_text_style.dart';
 import '/coreApp/constants/app_strings.dart';
-import '/features/components/student_card.dart';
-import '/features/student/models/student_model.dart';
-import '/features/student/models/scholarship_detail_model.dart';
-import '/features/student/models/scholarship_model.dart'; // ScholarshipModel
-import '/features/student/screens/profile/student_profile_screen.dart';
-import '/features/student/screens/scholar/scholar_screen.dart';
-import '/features/student/screens/scholar/scholarship_detail.dart';
-import 'package:scholarx_app/features/student/screens/tracking/tracking_screen.dart'; // รับ ScholarshipModel
+import '../../components/student_card.dart';
+import '/student/models/student_model.dart';
+import '/student/models/scholarship_detail_model.dart';
+import '/student/models/scholarship_model.dart'; // ScholarshipModel
+import '/student/screens/profile/student_profile_screen.dart';
+import '/student/screens/scholar/scholar_screen.dart';
+import '/student/screens/scholar/scholarship_detail.dart';
+import '/student/screens/tracking/tracking_screen.dart'; // รับ ScholarshipModel
 
 
 class StudentHomeScreen extends StatefulWidget {
