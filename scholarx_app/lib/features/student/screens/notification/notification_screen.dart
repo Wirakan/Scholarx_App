@@ -8,6 +8,7 @@ final List<NotificationItem> _mockNotifications = [
     type: NotificationType.status,
     title: 'ใบสมัครของคุณสำหรับทุนด้านเทคโนโลยีดิจิทัล กำลังอยู่ระหว่างการพิจารณา',
     statusLabel: 'กำลังพิจารณา',
+    status: ApplicationStatus.pending,
     createdAt: DateTime.now(),
   ),
   NotificationItem(
@@ -26,7 +27,8 @@ final List<NotificationItem> _mockNotifications = [
 
 // ===== SCREEN =====
 class NotificationScreen extends StatefulWidget {
-  const NotificationScreen({super.key});
+  final void Function(NotificationModel)? onOpenDetail;
+  const NotificationScreen({super.key, this.onOpenDetail});
 
   @override
   State<NotificationScreen> createState() => _NotificationScreenState();
@@ -183,8 +185,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               margin: const EdgeInsets.only(right: 8),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
               decoration: BoxDecoration(
                 color: selected
                     ? const Color(0xFFFF5722)
@@ -220,94 +221,111 @@ class _NotificationScreenState extends State<NotificationScreen> {
   Widget _buildNotificationCard(NotificationItem item) {
     final isStatus = item.type == NotificationType.status;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 46,
-            height: 46,
-            decoration: BoxDecoration(
-              color: isStatus
-                  ? const Color(0xFFFFF0EC)
-                  : const Color(0xFFF3EEFF),
-              shape: BoxShape.circle,
+    final notificationModel = (isStatus && item.status != null)
+        ? NotificationModel(
+            id: item.id,
+            scholarshipName: item.title,
+            status: item.status!,
+            createdAt: item.createdAt,
+            isRead: item.isRead,
+          )
+        : null;
+
+    return GestureDetector(
+      onTap: () {
+        if (notificationModel != null) {
+          widget.onOpenDetail?.call(notificationModel);
+        }
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
             ),
-            child: Icon(
-              isStatus
-                  ? Icons.assignment_outlined
-                  : Icons.campaign_outlined,
-              color: isStatus
-                  ? const Color(0xFFFF5722)
-                  : const Color(0xFF7B2FF7),
-              size: 22,
+          ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                color: isStatus
+                    ? const Color(0xFFFFF0EC)
+                    : const Color(0xFFF3EEFF),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                isStatus
+                    ? Icons.assignment_outlined
+                    : Icons.campaign_outlined,
+                color: isStatus
+                    ? const Color(0xFFFF5722)
+                    : const Color(0xFF7B2FF7),
+                size: 22,
+              ),
             ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: isStatus
-                            ? const Color(0xFFFFE5DC)
-                            : const Color(0xFFEEE0FF),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        isStatus
-                            ? (item.statusLabel ?? 'อัปเดตสถานะ')
-                            : 'ประกาศ!',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
                           color: isStatus
-                              ? const Color(0xFFFF5722)
-                              : const Color(0xFF7B2FF7),
+                              ? const Color(0xFFFFE5DC)
+                              : const Color(0xFFEEE0FF),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          isStatus
+                              ? (item.statusLabel ?? 'อัปเดตสถานะ')
+                              : 'ประกาศ!',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: isStatus
+                                ? const Color(0xFFFF5722)
+                                : const Color(0xFF7B2FF7),
+                          ),
                         ),
                       ),
-                    ),
-                    Text(
-                      _timeAgo(item.createdAt),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
+                      Text(
+                        _timeAgo(item.createdAt),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  item.title,
-                  style: const TextStyle(
-                    fontSize: 13.5,
-                    color: Colors.black87,
-                    height: 1.4,
+                    ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: 6),
+                  Text(
+                    item.title,
+                    style: const TextStyle(
+                      fontSize: 13.5,
+                      color: Colors.black87,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

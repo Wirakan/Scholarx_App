@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
-import '../../model/student/notification_model.dart';
+import 'package:scholarx_app/features/student/models/notification_model.dart';
 
 class NotificationDetailScreen extends StatelessWidget {
   final NotificationModel notification;
+  final VoidCallback? onBack;
 
   const NotificationDetailScreen({
     super.key,
     required this.notification,
+    this.onBack,
   });
 
   String _formatTime(DateTime dt) {
     final now = DateTime.now();
-    final isToday = dt.year == now.year && dt.month == now.month && dt.day == now.day;
+    final isToday = dt.year == now.year &&
+        dt.month == now.month &&
+        dt.day == now.day;
 
     final hour = dt.hour.toString().padLeft(2, '0');
     final minute = dt.minute.toString().padLeft(2, '0');
@@ -46,7 +50,7 @@ class NotificationDetailScreen extends StatelessWidget {
       ),
       leading: IconButton(
         icon: const Icon(Icons.arrow_back, color: Colors.white),
-        onPressed: () => Navigator.pop(context),
+        onPressed: onBack ?? () => Navigator.pop(context),
       ),
       title: const Text(
         'รายละเอียดแจ้งเตือน',

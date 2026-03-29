@@ -4,12 +4,11 @@ import '/coreApp/themeApp/app_text_style.dart';
 import '/coreApp/constants/app_strings.dart';
 import '/features/components/student_card.dart';
 import '/features/student/models/student_model.dart';
+import '/features/student/models/notification_model.dart';
 import '/features/student/screens/profile/student_profile_screen.dart';
 import '/features/student/screens/scholar/scholar_screen.dart';
 import '/features/student/screens/notification/notification_screen.dart';
-
-// features/student/screens/home/student_home_screen.dart
-// แก้ไขจากเดิม: เพิ่ม import ScholarScreen + เปลี่ยน _PlaceholderTab ของ Scholar + onTap ของ action card
+import '/features/student/screens/notification/notification_detail_screen.dart';
 
 class StudentHomeScreen extends StatefulWidget {
   const StudentHomeScreen({super.key});
@@ -20,6 +19,7 @@ class StudentHomeScreen extends StatefulWidget {
 
 class _StudentHomeScreenState extends State<StudentHomeScreen> {
   int _selectedIndex = 0;
+  NotificationModel? _selectedNotification;
   final StudentModel _student = StudentModel.mock;
 
   static const List<ScholarshipCardItem> _scholarships = [
@@ -59,18 +59,30 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
           _HomeTab(
             student: _student,
             scholarships: _scholarships,
-            onGoToScholar: () =>
-                setState(() => _selectedIndex = 1), // ← ส่ง callback
+            onGoToScholar: () => setState(() => _selectedIndex = 1),
           ),
-          const ScholarScreen(), // ← เปลี่ยนจาก _PlaceholderTab เป็น ScholarScreen
+          const ScholarScreen(),
           const _PlaceholderTab(label: 'Document'),
-          const NotificationScreen(),
+          _selectedNotification != null
+              ? NotificationDetailScreen(
+                  notification: _selectedNotification!,
+                  onBack: () =>
+                      setState(() => _selectedNotification = null),
+                )
+              : NotificationScreen(
+                  onOpenDetail: (model) =>
+                      setState(() => _selectedNotification = model),
+                ),
           StudentProfileScreen(student: _student),
         ],
       ),
       bottomNavigationBar: _BottomNav(
         selectedIndex: _selectedIndex,
-        onTap: (i) => setState(() => _selectedIndex = i),
+        onTap: (i) => setState(() {
+          _selectedIndex = i;
+          // เคลียร์ detail เมื่อกด tab notification ใหม่
+          if (i == 3) _selectedNotification = null;
+        }),
       ),
     );
   }
@@ -80,12 +92,12 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
 class _HomeTab extends StatelessWidget {
   final StudentModel student;
   final List<ScholarshipCardItem> scholarships;
-  final VoidCallback onGoToScholar; // ← เพิ่ม parameter
+  final VoidCallback onGoToScholar;
 
   const _HomeTab({
     required this.student,
     required this.scholarships,
-    required this.onGoToScholar, // ← เพิ่ม
+    required this.onGoToScholar,
   });
 
   @override
@@ -98,7 +110,7 @@ class _HomeTab extends StatelessWidget {
           sliver: SliverToBoxAdapter(
             child: Column(
               children: [
-                _GuideBanner(onTap: onGoToScholar), // ← ส่ง onTap
+                _GuideBanner(onTap: onGoToScholar),
                 const SizedBox(height: 16),
                 Row(
                   children: [
@@ -108,7 +120,7 @@ class _HomeTab extends StatelessWidget {
                         subtitle: AppStrings.openScholarships,
                         icon: Icons.emoji_events_rounded,
                         color: AppColors.primary,
-                        onTap: onGoToScholar, // ← navigate ไป Scholar tab
+                        onTap: onGoToScholar,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -155,7 +167,7 @@ class _HomeTab extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 12),
                 child: StudentCard(
                   item: scholarships[i],
-                  onTap: onGoToScholar, // ← กด "ดูรายละเอียด" → ไปหน้า Scholar
+                  onTap: onGoToScholar,
                 ),
               ),
               childCount: scholarships.length,
@@ -240,7 +252,7 @@ class _ProfileHeader extends StatelessWidget {
 
 // ─── Guide Banner ─────────────────────────────────────────────────────────────
 class _GuideBanner extends StatelessWidget {
-  final VoidCallback? onTap; // ← เพิ่ม onTap
+  final VoidCallback? onTap;
   const _GuideBanner({this.onTap});
 
   @override
