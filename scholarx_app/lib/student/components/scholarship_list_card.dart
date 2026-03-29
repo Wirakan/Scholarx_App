@@ -38,9 +38,12 @@ class ScholarshipListCard extends StatelessWidget {
                 child: Text(scholarship.title, style: AppTextStyle.titleCard),
               ),
               const SizedBox(width: 12),
-              Text(
+Text(
                 _formatAmount(scholarship.amount),
-                style: AppTextStyle.statNumber.copyWith(fontSize: 18),
+                style: AppTextStyle.statNumber.copyWith(
+                  fontSize: 18,
+                  color: Colors.black,
+                ),
               ),
             ],
           ),

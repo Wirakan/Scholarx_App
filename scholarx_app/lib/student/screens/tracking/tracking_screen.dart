@@ -363,7 +363,7 @@ class _TrackingCard extends StatelessWidget {
                       child: Text(
                         _formatAmount(record.amount),
                         style: AppTextStyle.heading3.copyWith(
-                          color: AppColors.primary,
+                          color: Colors.black, 
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
                         ),
