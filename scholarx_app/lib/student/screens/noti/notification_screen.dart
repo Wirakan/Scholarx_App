@@ -1,10 +1,7 @@
-// การเปลี่ยนแปลงจากของเดิม:
-//   - ลบ _mockNotifications ออก
-//   - ใช้ Consumer<NotificationProvider> แทน — rebuild อัตโนมัติเมื่อมีแจ้งเตือนใหม่
-//   - เรียก markAllRead() เมื่อเปิดหน้านี้
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '/coreApp/themeApp/app_colors.dart';
+import '/coreApp/themeApp/app_text_style.dart';
 import '/student/models/notification_model.dart';
 import '/student/providers/notification_provider.dart';
 
@@ -19,10 +16,14 @@ class NotificationScreen extends StatefulWidget {
 class _NotificationScreenState extends State<NotificationScreen> {
   int _selectedTab = 0;
 
+  // สีสำหรับ announcement (purple) — ไม่มีใน AppColors จึงเก็บไว้เป็น local const
+  static const Color _purple = Color(0xFF7B2FF7);
+  static const Color _purpleBg = Color(0xFFF3EEFF);
+  static const Color _purpleChip = Color(0xFFEEE0FF);
+
   @override
   void initState() {
     super.initState();
-    // มาร์กว่าอ่านแล้วเมื่อเปิดหน้านี้ (ทำหลัง frame แรก build เสร็จ)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<NotificationProvider>().markAllRead();
     });
@@ -40,12 +41,12 @@ class _NotificationScreenState extends State<NotificationScreen> {
   Map<String, List<NotificationItem>> _grouped(List<NotificationItem> items) {
     final now = DateTime.now();
     final todayStart = DateTime(now.year, now.month, now.day);
-    final weekStart  = todayStart.subtract(const Duration(days: 6));
+    final weekStart = todayStart.subtract(const Duration(days: 6));
 
     final grouped = <String, List<NotificationItem>>{
-      'วันนี้':    [],
+      'วันนี้': [],
       'สัปดาห์นี้': [],
-      'เก่ากว่า':  [],
+      'เก่ากว่า': [],
     };
 
     for (final item in items) {
@@ -85,24 +86,25 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Consumer rebuild อัตโนมัติเมื่อ provider เรียก notifyListeners()
     return Consumer<NotificationProvider>(
       builder: (context, provider, _) {
         final filtered = _filtered(provider.notifications);
-        final grouped  = _grouped(filtered);
+        final grouped = _grouped(filtered);
 
         return Scaffold(
-          backgroundColor: const Color(0xFFF5F5F5),
+          backgroundColor: AppColors.background,
           body: Column(
             children: [
               _buildHeader(provider.notifications.length),
               _buildTabs(),
               Expanded(
                 child: grouped.isEmpty
-                    ? const Center(
+                    ? Center(
                         child: Text(
                           'ไม่มีการแจ้งเตือน',
-                          style: TextStyle(color: Colors.grey),
+                          style: AppTextStyle.body.copyWith(
+                            color: AppColors.textTertiary,
+                          ),
                         ),
                       )
                     : ListView(
@@ -131,7 +133,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
       width: double.infinity,
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFFFF5722), Color(0xFFFF7043)],
+          colors: [AppColors.primary, AppColors.primaryLight],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -145,17 +147,16 @@ class _NotificationScreenState extends State<NotificationScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'การแจ้งเตือน',
-            style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold),
+            style: AppTextStyle.heading2.copyWith(color: AppColors.surface),
           ),
           const SizedBox(height: 4),
           Text(
             'การแจ้งเตือนทั้งหมด $totalCount รายการ',
-            style: const TextStyle(color: Colors.white, fontSize: 14),
+            style: AppTextStyle.body.copyWith(
+              color: AppColors.surface.withOpacity(0.9),
+            ),
           ),
         ],
       ),
@@ -165,47 +166,45 @@ class _NotificationScreenState extends State<NotificationScreen> {
   Widget _buildTabs() {
     const labels = ['ทั้งหมด', 'ข้อความ', 'กิจกรรม'];
     return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        children: List.generate(labels.length, (i) {
-          final selected = _selectedTab == i;
-          return GestureDetector(
-            onTap: () => setState(() => _selectedTab = i),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              margin: const EdgeInsets.only(right: 8),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-              decoration: BoxDecoration(
-                color: selected
-                    ? const Color(0xFFFF5722)
-                    : const Color(0xFFF0F0F0),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                labels[i],
-                style: TextStyle(
-                  color: selected ? Colors.white : Colors.black87,
-                  fontWeight: FontWeight.w500,
-                  fontSize: 14,
+      width: double.infinity,
+      color: AppColors.surface,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: List.generate(labels.length, (i) {
+            final selected = _selectedTab == i;
+            return GestureDetector(
+              onTap: () => setState(() => _selectedTab = i),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                margin: const EdgeInsets.only(right: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+                decoration: BoxDecoration(
+                  color: selected ? AppColors.primary : Colors.transparent,
+                  border: selected
+                      ? null
+                      : Border.all(color: AppColors.border, width: 1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  labels[i],
+                  style: AppTextStyle.label.copyWith(
+                    color: selected ? AppColors.surface : AppColors.textSecondary,
+                    fontSize: 13,
+                  ),
                 ),
               ),
-            ),
-          );
-        }),
+            );
+          }),
+        ),
       ),
     );
   }
 
   Widget _buildGroupHeader(String label) {
-    return Text(
-      label,
-      style: const TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.bold,
-          color: Colors.black87),
-    );
+    return Text(label, style: AppTextStyle.title.copyWith(fontSize: 15));
   }
 
   Widget _buildNotificationCard(NotificationItem item) {
@@ -232,8 +231,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          // ยังไม่อ่าน → พื้นหลังอ่อน ๆ
-          color: item.isRead ? Colors.white : const Color(0xFFFFF3F0),
+          color: item.isRead ? AppColors.surface : AppColors.primaryBg,
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
@@ -246,22 +244,17 @@ class _NotificationScreenState extends State<NotificationScreen> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // ── icon circle ──
             Container(
               width: 46,
               height: 46,
               decoration: BoxDecoration(
-                color: isStatus
-                    ? const Color(0xFFFFF0EC)
-                    : const Color(0xFFF3EEFF),
+                color: isStatus ? AppColors.primaryBg : _purpleBg,
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                isStatus
-                    ? Icons.assignment_outlined
-                    : Icons.campaign_outlined,
-                color: isStatus
-                    ? const Color(0xFFFF5722)
-                    : const Color(0xFF7B2FF7),
+                isStatus ? Icons.assignment_outlined : Icons.campaign_outlined,
+                color: isStatus ? AppColors.primary : _purple,
                 size: 22,
               ),
             ),
@@ -273,46 +266,39 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      // ── chip ──
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
-                          color: isStatus
-                              ? const Color(0xFFFFE5DC)
-                              : const Color(0xFFEEE0FF),
+                          color: isStatus ? AppColors.primaryBg : _purpleChip,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
                           isStatus
                               ? (item.statusLabel ?? 'อัปเดตสถานะ')
                               : 'ประกาศ!',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: isStatus
-                                ? const Color(0xFFFF5722)
-                                : const Color(0xFF7B2FF7),
+                          style: AppTextStyle.overline.copyWith(
+                            color: isStatus ? AppColors.primary : _purple,
                           ),
                         ),
                       ),
+                      // ── dot + time ──
                       Row(
                         children: [
-                          // จุดแดงเมื่อยังไม่ได้อ่าน
-                          if (!item.isRead) ...[
+                          if (!item.isRead)
                             Container(
                               width: 7,
                               height: 7,
                               margin: const EdgeInsets.only(right: 5),
                               decoration: const BoxDecoration(
-                                color: Color(0xFFFF5722),
+                                color: AppColors.primary,
                                 shape: BoxShape.circle,
                               ),
                             ),
-                          ],
                           Text(
                             _timeAgo(item.createdAt),
-                            style: const TextStyle(
-                                fontSize: 12, color: Colors.grey),
+                            style: AppTextStyle.caption,
                           ),
                         ],
                       ),
@@ -321,13 +307,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   const SizedBox(height: 6),
                   Text(
                     item.title,
-                    style: TextStyle(
-                      fontSize: 13.5,
-                      color: Colors.black87,
+                    style: AppTextStyle.body.copyWith(
                       height: 1.4,
-                      fontWeight: item.isRead
-                          ? FontWeight.normal
-                          : FontWeight.w600,
+                      fontWeight:
+                          item.isRead ? FontWeight.normal : FontWeight.w600,
                     ),
                   ),
                 ],

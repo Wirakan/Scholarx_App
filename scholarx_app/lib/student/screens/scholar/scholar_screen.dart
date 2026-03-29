@@ -126,6 +126,7 @@ class _ScholarScreenState extends State<ScholarScreen> {
 
           // ── Filter Tabs ────────────────────────────────────────────
           Container(
+            width: double.infinity, // ← เต็มจอ
             color: AppColors.surface,
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -144,22 +145,16 @@ class _ScholarScreenState extends State<ScholarScreen> {
                           vertical: 8,
                         ),
                         decoration: BoxDecoration(
-                          color: isSelected
-                              ? AppColors.primary
-                              : AppColors.background,
+                          color: isSelected ? AppColors.primary : AppColors.background,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: isSelected
-                                ? AppColors.primary
-                                : AppColors.border,
+                            color: isSelected ? AppColors.primary : AppColors.border,
                           ),
                         ),
                         child: Text(
                           cat.label,
                           style: AppTextStyle.label.copyWith(
-                            color: isSelected
-                                ? Colors.white
-                                : AppColors.textSecondary,
+                            color: isSelected ? Colors.white : AppColors.textSecondary,
                             fontSize: 13,
                           ),
                         ),
@@ -178,17 +173,11 @@ class _ScholarScreenState extends State<ScholarScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          Icons.search_off_rounded,
-                          size: 48,
-                          color: AppColors.textTertiary,
-                        ),
+                        Icon(Icons.search_off_rounded, size: 48, color: AppColors.textTertiary),
                         const SizedBox(height: 12),
                         Text(
                           'ไม่พบทุนที่ค้นหา',
-                          style: AppTextStyle.h3.copyWith(
-                            color: AppColors.textTertiary,
-                          ),
+                          style: AppTextStyle.h3.copyWith(color: AppColors.textTertiary),
                         ),
                       ],
                     ),
@@ -203,9 +192,7 @@ class _ScholarScreenState extends State<ScholarScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => ScholarshipDetailScreen(
-                              scholarship: filtered[i],
-                            ),
+                            builder: (_) => ScholarshipDetailScreen(scholarship: filtered[i]),
                           ),
                         );
                       },

@@ -20,6 +20,7 @@ import '/student/screens/tracking/tracking_screen.dart';
 import '/student/screens/noti/notification_screen.dart';
 import '/student/screens/noti/notification_detail_screen.dart';
 import '/student/screens/scholar/scholarship_detail.dart';
+import '/student/providers/tracking_provider.dart';
 
 class StudentHomeScreen extends StatefulWidget {
   const StudentHomeScreen({super.key});
@@ -31,6 +32,7 @@ class StudentHomeScreen extends StatefulWidget {
 class _StudentHomeScreenState extends State<StudentHomeScreen> {
   int _selectedIndex = 0;
   NotificationModel? _selectedNotification;
+  int _testStatusIndex = 0; 
 
   final StudentModel _student = mockStudent;
 
@@ -63,16 +65,31 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
 
-      // test admin notice work or not
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () {
-      //     context.read<NotificationProvider>().addStatusNotification(
-      //       scholarshipName: 'ทุนด้านเทคโนโลยีดิจิทัล',
-      //       status: ApplicationStatus.approved,
-      //     );
-      //   },
-      //   child: const Icon(Icons.add),
-      // ),
+      // test admin notice work or not แก้ปุ่ม
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          final trackingProvider = context.read<TrackingProvider>();
+          final pending = trackingProvider.pendingItems;
+
+          // ไม่มีรายการที่รอพิจารณาแล้ว
+          if (pending.isEmpty) return;
+
+          const cycle = [
+            ApplicationStatus.approved,
+            ApplicationStatus.rejected,
+          ];
+
+          final status = cycle[_testStatusIndex % cycle.length];
+          final name   = pending[_testStatusIndex % pending.length].title;
+          _testStatusIndex++;
+
+          context.read<NotificationProvider>().addStatusNotification(
+            scholarshipName: name,
+            status: status,
+          );
+        },
+        child: const Icon(Icons.add),
+      ),
 
       body: IndexedStack(
         index: _selectedIndex,
@@ -513,25 +530,45 @@ class _BottomNav extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       // ── pill highlight เมื่อ selected ──
-                      isSelected
-                          ? Container(
-                              width: 48,
-                              height: 36,
-                              decoration: BoxDecoration(
-                                color: AppColors.primary,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Icon(
-                                items[i].$1,
-                                color: Colors.white,
-                                size: 22,
-                              ),
-                            )
-                          : Icon(
-                              items[i].$2,
-                              color: const Color(0xFF9E9E9E),
-                              size: 24,
-                            ),
+                      Stack(
+  clipBehavior: Clip.none,
+  children: [
+    isSelected
+        ? Container(
+            width: 48,
+            height: 36,
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(items[i].$1, color: Colors.white, size: 22),
+          )
+        : Icon(items[i].$2, color: const Color(0xFF9E9E9E), size: 24),
+    // badge แดงบน notification tab
+    if (isNotifTab && unreadCount > 0 && !isSelected)
+      Positioned(
+        right: -4,
+        top: -4,
+        child: Container(
+          padding: const EdgeInsets.all(2),
+          constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+          decoration: const BoxDecoration(
+            color: Color(0xFFE53935),
+            shape: BoxShape.circle,
+          ),
+          child: Text(
+            unreadCount > 9 ? '9+' : '$unreadCount',
+            style: const TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+  ],
+),
                       const SizedBox(height: 4),
                       Text(
                         items[i].$3,

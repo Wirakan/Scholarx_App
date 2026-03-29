@@ -1,11 +1,17 @@
-//   1. ครอบ app ด้วย ChangeNotifierProvider ใน main.dart (ดูไฟล์ main.dart)
+//   1. ครอบ app ด้วย MultiProvider ใน main.dart (ดูไฟล์ main.dart)
 //   2. เรียก addNotification() จาก confirm_sheet.dart ตอน admin อนุมัติ/ปฏิเสธ
 //   3. อ่าน notifications / unreadCount ใน notification_screen.dart และ student_home_screen.dart
 
 import 'package:flutter/material.dart';
 import '/student/models/notification_model.dart';
+import '/student/providers/tracking_provider.dart';
+import '/student/screens/tracking/tracking_screen.dart';
 
 class NotificationProvider extends ChangeNotifier {
+  final TrackingProvider _trackingProvider;
+
+  NotificationProvider(this._trackingProvider);
+
   final List<NotificationItem> _notifications = [
     // Mock data เริ่มต้น — ลบออกได้เมื่อต่อ API จริง
     NotificationItem(
@@ -32,11 +38,9 @@ class NotificationProvider extends ChangeNotifier {
 
   // ── Public getters ─────────────────────────────────────────────────────────
 
-  List<NotificationItem> get notifications =>
-      List.unmodifiable(_notifications);
+  List<NotificationItem> get notifications => List.unmodifiable(_notifications);
 
-  int get unreadCount =>
-      _notifications.where((n) => !n.isRead).length;
+  int get unreadCount => _notifications.where((n) => !n.isRead).length;
 
   bool get hasUnread => unreadCount > 0;
 
@@ -50,7 +54,7 @@ class NotificationProvider extends ChangeNotifier {
     final label = switch (status) {
       ApplicationStatus.approved => 'อนุมัติแล้ว',
       ApplicationStatus.rejected => 'ไม่ผ่านการพิจารณา',
-      ApplicationStatus.pending  => 'กำลังพิจารณา',
+      ApplicationStatus.pending => 'กำลังพิจารณา',
     };
 
     final title = switch (status) {
@@ -70,6 +74,17 @@ class NotificationProvider extends ChangeNotifier {
       status: status,
       createdAt: DateTime.now(),
     ));
+
+    // ── sync สถานะไปยัง TrackingProvider ──
+    final trackingStatus = switch (status) {
+      ApplicationStatus.approved => TrackingStatus.approved,
+      ApplicationStatus.rejected => TrackingStatus.rejected,
+      ApplicationStatus.pending => TrackingStatus.reviewing,
+    };
+    _trackingProvider.updateStatusByTitle(
+      scholarshipName: scholarshipName,
+      newStatus: trackingStatus,
+    );
   }
 
   /// เรียกจากฝั่ง admin เมื่อเพิ่มทุนใหม่หรือส่งประกาศ
@@ -110,6 +125,5 @@ class NotificationProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  String _newId() =>
-      'notif_${DateTime.now().millisecondsSinceEpoch}';
+  String _newId() => 'notif_${DateTime.now().millisecondsSinceEpoch}';
 }
