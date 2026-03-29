@@ -48,11 +48,11 @@ return const LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       colors: [
-        Color(0xFFFF6B1A), // ส้มสว่าง top
-        Color(0xFFFF6B1A), // ส้มหลัก
-        Color.fromARGB(255, 255, 153, 98), // ส้มกลาง (ไม่เข้มมาก)
-        Color(0xFFFFCCA0), // ส้มอ่อนนวล
-        Color(0xFFFFE8D5), // ส้มครีมอ่อน
+        Color(0xFF9E2A00), // ส้มเข้มมาก (top shadow)
+        Color(0xFFD9480F), // ส้มเข้ม
+        Color(0xFFFF6B1A), // ⭐ primary
+        Color(0xFFFF9E66), // ส้มกลาง
+        Color(0xFFFFD3B3), // ส้มอ่อน
         Colors.white,
       ],
       stops: [0.0, 0.28, 0.48, 0.65, 0.80, 0.93],
@@ -172,9 +172,9 @@ TextSpan(
                         text: '....',
                         style: TextStyle(
                           color: _selectedRole == 'admin'
-                              ? primaryPurple
+                              ? const Color.fromARGB(255, 144, 112, 201)
                               : _selectedRole == 'student'
-                              ? primaryOrange
+                              ? const Color.fromARGB(255, 163, 122, 101)
                               : Colors.black.withOpacity(0.4),
                         ),
                       ),
@@ -187,8 +187,8 @@ TextSpan(
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
-                    color: Color(0xFF444444), // ดำอ่อนสวย,
-                    fontWeight: FontWeight.w500,
+                    color: Color.fromARGB(255, 91, 91, 91), // ดำอ่อนสวย,
+                    fontWeight: FontWeight.w700,
                     height: 1.4,
                   ),
                 ),
