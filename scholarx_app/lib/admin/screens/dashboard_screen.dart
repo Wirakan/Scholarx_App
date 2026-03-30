@@ -134,6 +134,7 @@ void _openDetail(BuildContext context, Applicant a, String? applicationId) {
         return Scaffold(
           appBar: AppBar(
             backgroundColor: SXColor.primary,
+            automaticallyImplyLeading: false,
             elevation: 0,
             title: const Text(
               'ภาพรวมระบบทุนการศึกษา',
